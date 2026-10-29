@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورقة الفطار الذكية 🥪</title>
+    <!-- خط Cairo المريح للعين -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK (Compat Mode لأعلى استقرار وبدون أخطاء) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #ea580c;
+            --primary-hover: #c2410c;
+            --primary-light: #ffedd5;
+            --success: #16a34a;
+            --success-light: #dcfce7;
+            --danger: #dc2626;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+        }
+
+        /* Header */
+        .app-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .app-header h1 {
+            font-size: 1.6rem;
+            color: var(--primary);
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .app-header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 22px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            margin-bottom: 16px;
+        }
+
+        /* Form Elements */
+        label {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            margin-bottom: 14px;
+            transition: 0.2s;
+        }
+        input:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+        }
+
+        /* Custom Segmented Control (تبديل نوع الطلب) */
+        .segmented-control {
+            display: flex;
+            gap: 8px;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 14px;
+        }
+        .seg-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: none;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .seg-btn.active {
+            background: #fff;
+            color: var(--primary);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-secondary { background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border); margin-top: 8px; }
+        .btn-danger { background: #fee2e2; color: var(--danger); }
+        .btn-success { background: var(--success); color: #fff; }
+
+        /* Dashboard Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            background: #f1f5f9;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .tab.active {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        /* List items in Distribution */
+        .order-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+        }
+        .order-card .user-name { font-weight: 800; font-size: 0.95rem; }
+        .order-card .user-items { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+        .btn-deliver {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: none;
+            background: var(--success-light);
+            color: var(--success);
+            font-weight: 800;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        .toast.show { display: block; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <header class="app-header">
+        <h1>🥪 ورقة الفطار الذكية</h1>
+        <p>لا لخبطة في الطلبات ولا حساب ناقص بعد النهاردة</p>
+    </header>
+
+    <!-- 1. شاشة الموظف (تسجيل الطلب عبر الرابط) -->
+    <div id="screen-employee" class="card">
+        <h2 style="font-size: 1.1rem; margin-bottom: 12px;">تسجيل طلب فطارك 😋</h2>
+        <div id="closed-alert" class="hidden" style="background: #fee2e2; color: var(--danger); padding: 12px; border-radius: 10px; font-weight: 700; margin-bottom: 14px; text-align: center;">
+            🔒 نعتذر، تم قفل الأوردر والمسؤول نزل يجيب الأكل!
+        </div>
+
+        <div id="employee-form">
+            <label>👤 اسمك:</label>
+            <input type="text" id="emp-name" placeholder="مثال: يوسف محمود">
+
+            <label>اختر نوع الطلب:</label>
+            <div class="segmented-control">
+                <button type="button" class="seg-btn active" id="btn-type-sandwiches" onclick="switchOrderType('sandwiches')">🥪 سندوتشات</button>
+                <button type="button" class="seg-btn" id="btn-type-bulk" onclick="switchOrderType('bulk')">🥡 علب وأكياس بالجنيه</button>
+            </div>
+
+            <!-- الحقل 1: السندوتشات -->
+            <div id="box-sandwiches">
+                <label>سندوتشاتك بالتفصيل:</label>
+                <textarea id="emp-sandwiches" rows="3" placeholder="مثال: 2 فول زيت حار، 1 طعمية محشية، 1 بطاطس"></textarea>
+            </div>
+
+            <!-- الحقل 2: العلب والأكياس (مخفي افتراضياً) -->
+            <div id="box-bulk" class="hidden">
+                <label>طلباتك بالجنيه (أكياس وعلب):</label>
+                <textarea id="emp-bulk" rows="3" placeholder="مثال: بـ 15 جنيه فول، بـ 10 طعمية عجينة، 5 أرغفة عيش"></textarea>
+            </div>
+
+            <button class="btn btn-primary" onclick="submitOrder()">تأكيد وإرسال طلبي 🚀</button>
+        </div>
+    </div>
+
+    <!-- 2. لوحة تحكم المشرف (Dashboard) -->
+    <div id="screen-admin" class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <h2 style="font-size: 1.1rem;">لوحة تحكم الأوردر 📋</h2>
+            <span id="badge-status" style="background: var(--success-light); color: var(--success); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800;">مفتوح 🟢</span>
+        </div>
+
+        <!-- التبويبات -->
+        <div class="tabs">
+            <div class="tab active" id="tab-cashier-btn" onclick="openAdminTab('cashier')">عند الكاشير 🛒</div>
+            <div class="tab" id="tab-distribute-btn" onclick="openAdminTab('distribute')">وقت التوزيع 📦</div>
+        </div>
+
+        <!-- تبويب الكاشير -->
+        <div id="tab-cashier">
+            <div style="background: #fff7ed; border: 1px dashed var(--primary); padding: 14px; border-radius: 12px; margin-bottom: 14px;">
+                <h4 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 6px;">ملخص الطلبات عند المطعم:</h4>
+                <div id="cashier-summary" style="font-size: 0.88rem; line-height: 1.7; color: var(--text-main);">
+                    جاري تحميل الطلبات...
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="copySummary()">📋 نسخ ملخص المطعم</button>
+            <button class="btn btn-secondary" onclick="shareWhatsApp()">💬 إرسال الملخص عبر واتساب</button>
+            <button class="btn btn-secondary" onclick="shareOrderLink()">🔗 نسخ رابط الطلب للموظفين</button>
+            <button class="btn btn-danger" style="margin-top: 10px;" id="btn-toggle-lock" onclick="toggleLockOrder()">🔒 قفل الأوردر للنزول</button>
+        </div>
+
+        <!-- تبويب التوزيع (الموظف اللي يستلم يختفي فوراً) -->
+        <div id="tab-distribute" class="hidden">
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">الموظف اللي يستلم ويحاسب اضغط على زراره عشان يختفي وتفضل القائمة رايقة:</p>
+            
+            <div id="distribute-list">
+                <!-- قائمة الموظفين تظهر هنا ديناميكياً -->
+            </div>
+
+            <div id="all-done-banner" class="hidden" style="text-align: center; padding: 25px;">
+                <h3 style="color: var(--success); font-size: 1.3rem;">🎉 عاش يا بطل!</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">كل الناس استلمت وحاسبت ومفيش مليم ناقص.</p>
+                <button class="btn btn-secondary" style="margin-top: 12px;" onclick="showArchiveModal()">📜 ورقة الفطار الأخيرة (سجل 24 ساعة)</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Toast للإشعارات -->
+<div class="toast" id="toast"></div>
+
+<script>
+    // 1. تهيئة Firebase بمفاتيحك الحقيقية
+    const firebaseConfig = {
+        apiKey: "AIzaSyBfOJPkWbmcJ6s29bDNysr-H0Kx-Js3Gy0",
+        authDomain: "am--rewards.firebaseapp.com",
+        databaseURL: "https://am--rewards-default-rtdb.firebaseio.com",
+        projectId: "am--rewards",
+        storageBucket: "am--rewards.firebasestorage.app",
+        messagingSenderId: "744783579735",
+        appId: "1:744783579735:web:45e00de9998893bbc9b112"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // أوردر اليوم الثابت
+    const orderDocRef = db.collection('breakfast_sessions').doc('today_order');
+
+    let currentOrderType = 'sandwiches';
+    let currentData = { isLocked: false, items: [] };
+
+    // تبديل نوع الطلب في شاشة الموظف (واحد يظهر والتاني يختفي)
+    function switchOrderType(type) {
+        currentOrderType = type;
+        if (type === 'sandwiches') {
+            document.getElementById('btn-type-sandwiches').classList.add('active');
+            document.getElementById('btn-type-bulk').classList.remove('active');
+            document.getElementById('box-sandwiches').classList.remove('hidden');
+            document.getElementById('box-bulk').classList.add('hidden');
+        } else {
+            document.getElementById('btn-type-bulk').classList.add('active');
+            document.getElementById('btn-type-sandwiches').classList.remove('active');
+            document.getElementById('box-bulk').classList.remove('hidden');
+            document.getElementById('box-sandwiches').classList.add('hidden');
+        }
+    }
+
+    // الاستماع المباشر للتغييرات في Firebase
+    orderDocRef.onSnapshot((doc) => {
+        if (doc.exists) {
+            currentData = doc.data();
+            renderUI();
+        } else {
+            // إنشاء أوردر افتراضي جديد
+            orderDocRef.set({ isLocked: false, items: [], updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        }
+    });
+
+    // تحديث الواجهة تلقائياً
+    function renderUI() {
+        const isLocked = currentData.isLocked || false;
+        const items = currentData.items || [];
+
+        // تحديث حالة القفل
+        document.getElementById('closed-alert').classList.toggle('hidden', !isLocked);
+        document.getElementById('employee-form').classList.toggle('hidden', isLocked);
+        
+        const badge = document.getElementById('badge-status');
+        const lockBtn = document.getElementById('btn-toggle-lock');
+        if (isLocked) {
+            badge.innerText = 'مغلق 🔒';
+            badge.style.background = '#fee2e2';
+            badge.style.color = '#dc2626';
+            lockBtn.innerText = '🔓 إعادة فتح الأوردر';
+            lockBtn.className = 'btn btn-secondary';
+        } else {
+            badge.innerText = 'مفتوح 🟢';
+            badge.style.background = '#dcfce7';
+            badge.style.color = '#16a34a';
+            lockBtn.innerText = '🔒 قفل الأوردر للنزول';
+            lockBtn.className = 'btn btn-danger';
+        }
+
+        // 1. حساب ملخص الكاشير
+        let summaryHtml = '';
+        if (items.length === 0) {
+            summaryHtml = 'لا توجد طلبات مسجلة حتى الآن.';
+        } else {
+            let sandwichesList = [];
+            let bulkList = [];
+            items.forEach(order => {
+                if (order.sandwiches) sandwichesList.push(`• <b>${order.name}:</b> ${order.sandwiches}`);
+                if (order.bulk) bulkList.push(`• <b>${order.name}:</b> ${order.bulk}`);
+            });
+
+            if (sandwichesList.length > 0) {
+                summaryHtml += `<b>🥪 قسم السندوتشات:</b><br>${sandwichesList.join('<br>')}<br><br>`;
+            }
+            if (bulkList.length > 0) {
+                summaryHtml += `<b>🥡 قسم العلب والأكياس:</b><br>${bulkList.join('<br>')}`;
+            }
+        }
+        document.getElementById('cashier-summary').innerHTML = summaryHtml;
+
+        // 2. قائمة التوزيع الذكية (فقط الذين لم يستلموا)
+        const pendingItems = items.filter(x => !x.delivered);
+        const distributeList = document.getElementById('distribute-list');
+        const allDoneBanner = document.getElementById('all-done-banner');
+
+        if (items.length > 0 && pendingItems.length === 0) {
+            distributeList.innerHTML = '';
+            allDoneBanner.classList.remove('hidden');
+        } else {
+            allDoneBanner.classList.add('hidden');
+            distributeList.innerHTML = pendingItems.map(order => `
+                <div class="order-card" id="card-${order.id}">
+                    <div>
+                        <div class="user-name">👤 ${order.name}</div>
+                        <div class="user-items">📦 ${order.sandwiches || ''} ${order.bulk ? ' | ' + order.bulk : ''}</div>
+                    </div>
+                    <button class="btn-deliver" onclick="markDelivered('${order.id}')">استلم وحاسب ✔</button>
+                </div>
+            `).join('');
+        }
+    }
+
+    // إرسال طلب الموظف إلى Firebase
+    function submitOrder() {
+        const name = document.getElementById('emp-name').value.trim();
+        const sandwiches = document.getElementById('emp-sandwiches').value.trim();
+        const bulk = document.getElementById('emp-bulk').value.trim();
+
+        if (!name) {
+            showToast('من فضلك اكتب اسمك!');
+            return;
+        }
+
+        const newOrder = {
+            id: 'ord_' + Date.now(),
+            name: name,
+            sandwiches: currentOrderType === 'sandwiches' ? sandwiches : '',
+            bulk: currentOrderType === 'bulk' ? bulk : '',
+            delivered: false,
+            createdAt: new Date().toISOString()
+        };
+
+        const updatedItems = [...(currentData.items || []), newOrder];
+
+        orderDocRef.update({ items: updatedItems }).then(() => {
+            showToast('✅ تم تسجيل طلبك بنجاح!');
+            document.getElementById('emp-sandwiches').value = '';
+            document.getElementById('emp-bulk').value = '';
+        });
+    }
+
+    // علامة "استلم وحاسب" (يختفي فوراً من شاشة التوزيع)
+    function markDelivered(orderId) {
+        const updatedItems = currentData.items.map(order => {
+            if (order.id === orderId) {
+                return { ...order, delivered: true };
+            }
+            return order;
+        });
+
+        orderDocRef.update({ items: updatedItems }).then(() => {
+            showToast('تم تسليم الطلب بنجاح ✔');
+        });
+    }
+
+    // قفل أو فتح الأوردر
+    function toggleLockOrder() {
+        const newLockState = !currentData.isLocked;
+        orderDocRef.update({ isLocked: newLockState }).then(() => {
+            showToast(newLockState ? '🔒 تم قفل الأوردر' : '🟢 تم فتح الأوردر');
+        });
+    }
+
+    // تبديل تبويبات المشرف
+    function openAdminTab(tab) {
+        if (tab === 'cashier') {
+            document.getElementById('tab-cashier-btn').classList.add('active');
+            document.getElementById('tab-distribute-btn').classList.remove('active');
+            document.getElementById('tab-cashier').classList.remove('hidden');
+            document.getElementById('tab-distribute').classList.add('hidden');
+        } else {
+            document.getElementById('tab-distribute-btn').classList.add('active');
+            document.getElementById('tab-cashier-btn').classList.remove('active');
+            document.getElementById('tab-distribute').classList.remove('hidden');
+            document.getElementById('tab-cashier').classList.add('hidden');
+        }
+    }
+
+    // نسخ ملخص الكاشير
+    function copySummary() {
+        const text = document.getElementById('cashier-summary').innerText;
+        navigator.clipboard.writeText(text).then(() => showToast('📋 تم نسخ الملخص!'));
+    }
+
+    // إرسال واتساب
+    function shareWhatsApp() {
+        const text = encodeURIComponent("🥪 أوردر الفطار اليوم:\n\n" + document.getElementById('cashier-summary').innerText);
+        window.open(`https://wa.me/?text=${text}`, '_blank');
+    }
+
+    // مشاركة رابط الأوردر
+    function shareOrderLink() {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            showToast('🔗 تم نسخ رابط الموقع لمشاركته على الواتس!');
+        });
+    }
+
+    // إشعار Toast
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.className = 'toast show';
+        setTimeout(() => t.className = 'toast', 2500);
+    }
+</script>
+
+</body>
+  </html>
