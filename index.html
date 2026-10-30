@@ -52,6 +52,7 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
 .btn:disabled{opacity:.5;pointer-events:none}
 .btn.ghost{background:transparent;color:var(--text-color);border:1px solid rgba(79,172,254,.45)}
 .btn.danger{background:transparent;color:var(--danger-color);border:1px solid var(--danger-color)}
+.btn.purple{background:linear-gradient(135deg,var(--accent-purple),var(--secondary-neon));color:#fff}
 .btn.ok{background:linear-gradient(135deg,var(--success-color),#26d0a0);color:#04121a}
 .btn.warn{background:linear-gradient(135deg,var(--warning-color),#ffc048);color:#04121a}
 
@@ -145,20 +146,30 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
       <textarea id="fBulk" placeholder="بـ 15 فول، بـ 10 طعمية، 5 عيش"></textarea>
     </div>
 
-    <!-- أزرار الإجراءات مع ميزة التعديل الذكية -->
+    <!-- أزرار الإجراءات: حفظ، تعديل، وموظف جديد -->
     <div class="row" style="margin-top:14px">
       <button class="btn ok" id="savePersonBtn" type="button" style="flex:2">💾 حفظ الطلب</button>
-      <button class="btn danger hidden" id="cancelEditBtn" type="button" style="flex:1">❌ إلغاء التعديل</button>
+      <button class="btn purple hidden" id="newPersonBtn" type="button" style="flex:1">➕ موظف جديد</button>
     </div>
   </div>
 
-  <!-- التبويبات الرئيسية للمشرف -->
+  <!-- التبويبات الرئيسية: جمع الطلبات ووقت التوزيع -->
   <div class="tabs">
-    <button id="tb-cashier" data-tab="cashier" class="on">عند الكاشير 🛒</button>
+    <button id="tb-cashier" data-tab="cashier" class="on">جمع الطلبات 📊</button>
     <button id="tb-deliver" data-tab="deliver">وقت التوزيع 📦</button>
   </div>
 
-  <div id="paneCashier"></div>
+  <div id="paneCashier">
+    <div style="text-align:center; margin-bottom:14px;">
+      <button class="btn warn" id="btnCalculateSummary" type="button" style="width:100%; padding:14px; font-size:1.05rem;">
+        ⚡ اضغط لتجميع وحساب كل الطلبات الآن
+      </button>
+    </div>
+    <div id="summaryResultsContainer">
+      <div class="card empty">اضغط على الزرار بالأعلى لتجميع وحساب إجمالي الأصناف والفلوس.</div>
+    </div>
+  </div>
+
   <div id="paneDeliver" class="hidden"></div>
 
   <!-- أزرار الإدارة السفلية -->
@@ -201,7 +212,8 @@ let meal = 'breakfast', unsub = null, tab = 'cashier';
 let state = {items:[]};
 const payChoice = {}; 
 let empType = 'sandwich';
-let editingId = null; // يحمل كود الموظف الجاري تعديله حالياً
+let currentActiveId = null; // يحمل كود الموظف الحالي (للتعديل الفوري)
+let isSummaryCalculated = false;
 
 const localStore = {
   get(m){
@@ -256,6 +268,7 @@ function listen(){
           state = {items: snap.data().items};
           localStore.set(meal, state);
           render();
+          if (isSummaryCalculated) calculateAndDisplaySummary();
         }
       },
       err => { console.warn('Firebase notice:', err); }
@@ -268,6 +281,7 @@ async function mutate(fn){
   state = next;
   localStore.set(meal, state);
   render();
+  if (isSummaryCalculated) calculateAndDisplaySummary();
 
   try {
     const r = ref();
@@ -359,13 +373,15 @@ function render(){
   $('paneCashier').classList.toggle('hidden', tab !== 'cashier');
   $('paneDeliver').classList.toggle('hidden', tab !== 'deliver');
   
-  if (tab === 'cashier') renderCashier(); else renderDeliver();
+  if (tab === 'deliver') renderDeliver();
 }
 
-function renderCashier(){
-  const p = $('paneCashier');
+/* ---------- حساب وعرض الملخص عند الضغط فقط ---------- */
+function calculateAndDisplaySummary(){
+  isSummaryCalculated = true;
+  const p = $('summaryResultsContainer');
   if (!state.items.length){
-    p.innerHTML = '<div class="card empty">📭 لسه مفيش موظفين متسجلين في أوردر ' + esc(MEALS[meal].label) + '. اكتب الاسم والطلب واضغط حفظ!</div>';
+    p.innerHTML = '<div class="card empty">📭 لسه مفيش موظفين متسجلين في أوردر ' + esc(MEALS[meal].label) + '.</div>';
     return;
   }
   const a = aggregate(state.items);
@@ -391,6 +407,11 @@ function renderCashier(){
   $('waSum').onclick = () => window.open('https://wa.me/?text=' + encodeURIComponent(buildSummary()), '_blank', 'noopener');
 }
 
+$('btnCalculateSummary').addEventListener('click', () => {
+  calculateAndDisplaySummary();
+  toast('📊 تم تجميع وحساب جميع الطلبات بنجاح!', 'info');
+});
+
 function renderDeliver(){
   const p = $('paneDeliver');
   const all = state.items, left = all.filter(i => !i.delivered);
@@ -413,7 +434,7 @@ function renderDeliver(){
       '<div class="name">' +
         '<span>👤 ' + esc(it.name) + ' <span class="tag">' + (it.type === 'mixed' ? '🔀 مكس' : (it.type === 'bulk' ? '🥡 علب' : '🥪 سندوتشات')) + '</span></span>' +
         '<div class="card-actions">' +
-          '<button class="btn-icon" title="تعديل هذا الطلب" onclick="startEditWorker(\'' + esc(it.id) + '\')">✏️</button>' +
+          '<button class="btn-icon" title="تعديل هذا الطلب" onclick="loadWorkerForEdit(\'' + esc(it.id) + '\')">✏️</button>' +
           '<button class="btn-icon del" title="حذف هذا الطلب" onclick="deleteWorker(\'' + esc(it.id) + '\')">🗑️</button>' +
         '</div>' +
       '</div>' +
@@ -445,49 +466,49 @@ function renderDeliver(){
   });
 }
 
-/* ---------- دالة بدء التعديل (Edit Mode) ---------- */
-function startEditWorker(id){
+/* ---------- دالة تحميل الموظف للتعديل ---------- */
+function loadWorkerForEdit(id){
   const it = state.items.find(x => x.id === id);
   if (!it) return;
 
-  editingId = id;
+  currentActiveId = id;
   $('fName').value = it.name;
   $('fSand').value = it.sandText || '';
   $('fBulk').value = it.bulkText || '';
 
-  // تفعيل نوع الطلب المناسب
   empType = it.type || 'sandwich';
   setOrderTypeUI(empType);
 
-  // تحديث شكل الأزرار لوضع التعديل
+  // تحديث الزرار لوضع التعديل وإظهار زر موظف جديد
   $('formTitle').textContent = '✏️ تعديل طلب (' + it.name + ')';
   $('savePersonBtn').textContent = '💾 حفظ التعديل';
   $('savePersonBtn').className = 'btn warn';
-  $('cancelEditBtn').classList.remove('hidden');
+  $('newPersonBtn').classList.remove('hidden');
 
-  // صعود ناعم لأعلى الصفحة عند الفورم
   $('formCard').scrollIntoView({ behavior: 'smooth' });
-  toast('✏️ جاري تعديل طلب: ' + it.name, 'info');
+  toast('✏️ البيانات معروضة لو حابب تعدل', 'info');
 }
 
-/* ---------- دالة إلغاء التعديل ---------- */
-function cancelEdit(){
-  editingId = null;
+/* ---------- دالة بدء موظف جديد (تفريغ الخانات يدوياً) ---------- */
+function startNewPerson(){
+  currentActiveId = null;
   $('fName').value = '';
   $('fSand').value = '';
   $('fBulk').value = '';
   $('formTitle').textContent = '➕ تسجيل طلب موظف';
   $('savePersonBtn').textContent = '💾 حفظ الطلب';
   $('savePersonBtn').className = 'btn ok';
-  $('cancelEditBtn').classList.add('hidden');
+  $('newPersonBtn').classList.add('hidden');
+  $('fName').focus();
+  toast('✨ جاهز لتسجيل موظف جديد');
 }
 
-$('cancelEditBtn').addEventListener('click', cancelEdit);
+$('newPersonBtn').addEventListener('click', startNewPerson);
 
 // دالة حذف موظف مسجل
 async function deleteWorker(id){
   if (!confirm('هل تريد حذف هذا الطلب من القائمة؟')) return;
-  if (editingId === id) cancelEdit(); // لو كان مفتوح في التعديل يلغيه
+  if (currentActiveId === id) startNewPerson();
   await mutate(cur => {
     cur.items = cur.items.filter(x => x.id !== id);
     return cur;
@@ -516,7 +537,7 @@ $('typeSeg').addEventListener('click', e => {
   setOrderTypeUI(empType);
 });
 
-/* ---------- حفظ أو تحديث الطلب ---------- */
+/* ---------- حفظ أو تعديل الطلب ---------- */
 $('savePersonBtn').addEventListener('click', async () => {
   const name = $('fName').value.trim();
   const sandText = $('fSand').value.trim();
@@ -531,11 +552,11 @@ $('savePersonBtn').addEventListener('click', async () => {
   btn.disabled = true;
 
   try{
-    if (editingId){
-      // وضع التعديل: تحديث الموظف القائم في مكانه
+    if (currentActiveId){
+      // تعديل الموظف الحالي
       await mutate(cur => {
         cur.items = cur.items.map(x => {
-          if (x.id === editingId){
+          if (x.id === currentActiveId){
             return {
               ...x,
               name,
@@ -548,12 +569,12 @@ $('savePersonBtn').addEventListener('click', async () => {
         });
         return cur;
       });
-      toast('✅ تم تحديث طلب (' + name + ') بنجاح!');
-      cancelEdit();
+      toast('✅ تم تحديث طلب (' + name + ')! البيانات لسه ظاهرة لو حابب تعدل تاني.');
     } else {
-      // وضع الإضافة الجديدة
+      // إضافة موظف جديد
+      const newId = 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
       const newItem = {
-        id: 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+        id: newId,
         name,
         type: empType,
         sandText: (empType === 'sandwich' || empType === 'mixed') ? sandText : '',
@@ -568,10 +589,14 @@ $('savePersonBtn').addEventListener('click', async () => {
         return cur;
       });
 
-      $('fName').value = '';
-      $('fSand').value = '';
-      $('fBulk').value = '';
-      toast('💾 تم حفظ طلب (' + name + ') بنجاح!');
+      // نخليه في وضع التعديل لنفس الشخص بحيث البيانات متتمسحش!
+      currentActiveId = newId;
+      $('formTitle').textContent = '✏️ تم حفظ (' + name + ')';
+      $('savePersonBtn').textContent = '💾 حفظ التعديل';
+      $('savePersonBtn').className = 'btn warn';
+      $('newPersonBtn').classList.remove('hidden');
+
+      toast('💾 تم الحفظ! البيانات لسه قدامك، أو اضغط "موظف جديد" للي بعده.');
     }
   }catch(e){
     console.error(e);
@@ -590,7 +615,9 @@ document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click
 document.querySelectorAll('.meals button').forEach(b => b.addEventListener('click', () => {
   if (meal === b.dataset.meal) return;
   meal = b.dataset.meal; 
-  if (editingId) cancelEdit();
+  startNewPerson();
+  isSummaryCalculated = false;
+  $('summaryResultsContainer').innerHTML = '<div class="card empty">اضغط على الزرار بالأعلى لتجميع وحساب إجمالي الأصناف والفلوس.</div>';
   listen();
 }));
 
@@ -609,7 +636,9 @@ $('resetBtn').addEventListener('click', async () => {
         });
       } catch(e){}
     }
-    if (editingId) cancelEdit();
+    startNewPerson();
+    isSummaryCalculated = false;
+    $('summaryResultsContainer').innerHTML = '<div class="card empty">اضغط على الزرار بالأعلى لتجميع وحساب إجمالي الأصناف والفلوس.</div>';
     await mutate(c => ({items:[]}));
     toast('🗑️ تم تفريغ الأوردر وبدء جلسة جديدة');
   }catch(e){ toast('❌ مشكلة في التعيين', 'error'); }
