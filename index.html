@@ -56,7 +56,7 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
 .btn.ok{background:linear-gradient(135deg,var(--success-color),#26d0a0);color:#04121a}
 .btn.warn{background:linear-gradient(135deg,var(--warning-color),#ffc048);color:#04121a}
 
-/* Action Icons on Cards */
+/* Action Icons */
 .card-actions{display:flex;align-items:center;gap:4px}
 .btn-icon{background:transparent;border:none;font-size:1.05rem;cursor:pointer;padding:4px 6px;border-radius:8px;transition:.2s}
 .btn-icon:hover{background:rgba(255,255,255,.1)}
@@ -70,7 +70,7 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
 .badge.wait{color:var(--warning-color);border-color:var(--warning-color);background:rgba(255,165,2,.2);font-size:.8rem}
 .top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
 
-/* tabs - 3 buttons */
+/* tabs */
 .tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:16px 0 14px}
 .tabs button{font:inherit;font-weight:700;padding:11px 4px;border-radius:12px;border:1px solid rgba(127,0,255,.5);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;transition:.2s;font-size:.85rem}
 .tabs button.on{background:linear-gradient(135deg,var(--accent-purple),var(--secondary-neon));color:#fff;box-shadow:0 0 16px rgba(127,0,255,.5)}
@@ -82,7 +82,7 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
 .agg b{color:var(--primary-neon);white-space:nowrap}
 .total{margin-top:8px;text-align:left;font-weight:900;color:var(--warning-color)}
 
-/* worker cards (سريعة جداً بدون بطء) */
+/* worker cards (سريعة بدون تقل) */
 .wcard{transition:opacity .15s ease, transform .15s ease}
 .wcard.fade{opacity:0;transform:scale(0.92);pointer-events:none}
 .wcard .name{font-weight:900;font-size:1.1rem;display:flex;justify-content:space-between;align-items:center}
@@ -113,7 +113,7 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
 <div class="wrap">
   <h1>📡 رادار أوردرات الشغل</h1>
 
-  <!-- تبديل الوجبة (فطار / عشاء) -->
+  <!-- تبديل الوجبة -->
   <div class="meals" role="tablist">
     <button id="mb-breakfast" data-meal="breakfast">🥪 أوردر الفطار</button>
     <button id="mb-dinner" data-meal="dinner">🍔 أوردر العشاء / الغداء</button>
@@ -129,7 +129,7 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
     <label for="fName">اسم الموظف</label>
     <input type="text" id="fName" placeholder="مثال: أحمد فتحي" maxlength="60">
 
-    <!-- قسم نوع الطلب (يظهر في الفطار فقط ويختفي في العشاء) -->
+    <!-- قسم نوع الطلب (يظهر في الفطار فقط) -->
     <div id="typeSegContainer">
       <label>نوع الطلب</label>
       <div class="seg" id="typeSeg">
@@ -145,27 +145,26 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
       <textarea id="fSand" placeholder="2 فول زيت حار، 1 طعمية محشية"></textarea>
     </div>
 
-    <!-- حقل العلب بالجنيه (خاص بالفطار فقط) -->
+    <!-- حقل العلب بالجنيه (للفطار فقط) -->
     <div id="boxBulk" class="hidden">
       <label for="fBulk">العلب والأكياس (بالجنيه والعيش)</label>
       <textarea id="fBulk" placeholder="بـ 15 فول، بـ 10 طعمية، 5 عيش"></textarea>
     </div>
 
-    <!-- أزرار الإجراءات -->
+    <!-- زر الحفظ الفوري -->
     <div class="row" style="margin-top:14px">
-      <button class="btn ok" id="savePersonBtn" type="button" style="flex:2">💾 حفظ الطلب</button>
-      <button class="btn purple hidden" id="newPersonBtn" type="button" style="flex:1">➕ موظف جديد</button>
+      <button class="btn ok" id="savePersonBtn" type="button" style="width:100%; padding:13px;">💾 حفظ الطلب</button>
     </div>
   </div>
 
-  <!-- التبويبات الرئيسية (3 تبويبات شاملة) -->
+  <!-- التبويبات الثلاثة -->
   <div class="tabs">
     <button id="tb-cashier" data-tab="cashier" class="on">جمع الطلبات 📊</button>
     <button id="tb-deliver" data-tab="deliver">وقت التوزيع 📦</button>
     <button id="tb-all" data-tab="all">كل الأوردرات 📋</button>
   </div>
 
-  <!-- 1. تبويب جمع الطلبات -->
+  <!-- 1. جمع الطلبات -->
   <div id="paneCashier">
     <div style="text-align:center; margin-bottom:14px;">
       <button class="btn warn" id="btnCalculateSummary" type="button" style="width:100%; padding:14px; font-size:1.05rem;">
@@ -177,10 +176,10 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
     </div>
   </div>
 
-  <!-- 2. تبويب وقت التوزيع -->
+  <!-- 2. وقت التوزيع -->
   <div id="paneDeliver" class="hidden"></div>
 
-  <!-- 3. تبويب كل الأوردرات والتعديل الشامل -->
+  <!-- 3. كل الأوردرات والتعديل -->
   <div id="paneAll" class="hidden"></div>
 
   <!-- أزرار الإدارة السفلية -->
@@ -223,7 +222,7 @@ let meal = 'breakfast', unsub = null, tab = 'cashier';
 let state = {items:[]};
 const payChoice = {}; 
 let empType = 'sandwich';
-let currentActiveId = null;
+let editingId = null;
 let isSummaryCalculated = false;
 
 const localStore = {
@@ -305,49 +304,101 @@ async function mutate(fn){
   }
 }
 
-/* ---------- التجميع الرياضي الذكي ---------- */
+/* ---------- نظام التجميع الرياضي الدقيق المحسّن للفطار والعشاء ---------- */
 const AR_DIGITS = '٠١٢٣٤٥٦٧٨٩';
 const toEn = s => String(s).replace(/[٠-٩]/g, d => AR_DIGITS.indexOf(d)).replace(/٫/g,'.');
-const keyOf = s => s.replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ـ/g,'').replace(/\s+/g,' ').trim().toLowerCase();
-const splitSegs = t => toEn(t).split(/[,،\n+؛;]| و /).map(s => s.trim()).filter(Boolean);
+
+// توحيد الحروف العربية والتنظيف
+function cleanItemName(s){
+  return s.replace(/[أإآ]/g,'ا')
+          .replace(/ى/g,'ي')
+          .replace(/ة/g,'ه')
+          .replace(/ـ/g,'')
+          .replace(/\s+/g,' ')
+          .trim();
+}
+
+// مفتاح المقارنة الصارم
+const keyOf = s => cleanItemName(s).toLowerCase();
+
+// تقسيم الجمل بدقة عالية بدون تكسير أسماء الأصناف
+function splitSegs(t){
+  return toEn(t)
+    .split(/[,،\n+؛;]|\s+و\s+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+}
 
 function parseSand(text){
   return splitSegs(text).map(seg => {
-    let m = seg.match(/^(\d+)\s*(?:x|×)?\s*(.*)$/i);
-    if (m) return {qty:+m[1], name:m[2].trim() || 'غير محدد'};
-    m = seg.match(/^(.*?)\s*(?:x|×)\s*(\d+)$/i);
-    if (m) return {qty:+m[2], name:m[1].trim() || 'غير محدد'};
-    return {qty:1, name:seg};
+    // حالة: 2 فول أو 2فول
+    let m = seg.match(/^(\d+)\s*(?:x|×|-)?\s*(.*)$/i);
+    if (m && m[2].trim()) return {qty: +m[1], name: cleanItemName(m[2])};
+    
+    // حالة: فول x 2
+    m = seg.match(/^(.*?)\s*(?:x|×|-)\s*(\d+)$/i);
+    if (m && m[1].trim()) return {qty: +m[2], name: cleanItemName(m[1])};
+    
+    // بدون رقم صريح (يتحسب 1)
+    return {qty: 1, name: cleanItemName(seg)};
   });
 }
+
 function parseBulk(text){
   return splitSegs(text).map(seg => {
-    seg = seg.replace(/^ب\u0640*\s*(?=\d)/, '');
-    let m = seg.match(/^(\d+(?:\.\d+)?)\s*(?:جنيه|جنية|ج|egp)?\s*(.*)$/i);
-    if (m) return {amt:+m[1], name:m[2].trim() || 'غير محدد'};
-    m = seg.match(/^(.*?)\s*(\d+(?:\.\d+)?)\s*(?:جنيه|جنية|ج|egp)?$/i);
-    if (m) return {amt:+m[2], name:m[1].trim() || 'غير محدد'};
-    return {amt:0, name:seg};
+    let clean = seg.replace(/^ب\u0640*\s*(?=\d)/, '').trim();
+    
+    // حالة: بـ 15 فول أو 15 جنيه فول
+    let m = clean.match(/^(\d+(?:\.\d+)?)\s*(?:جنيه|جنية|ج|egp)?\s*(.*)$/i);
+    if (m && m[2].trim()) return {amt: +m[1], name: cleanItemName(m[2])};
+    
+    // حالة: فول 15 جنيه
+    m = clean.match(/^(.*?)\s*(\d+(?:\.\d+)?)\s*(?:جنيه|جنية|ج|egp)?$/i);
+    if (m && m[1].trim()) return {amt: +m[2], name: cleanItemName(m[1])};
+    
+    // حالة: 5 عيش (تتحسب كعدد لو مفيش لفظ جنيه)
+    let mCount = seg.match(/^(\d+)\s*(.*)$/);
+    if (mCount && mCount[2].trim()){
+      return {amt: 0, countQty: +mCount[1], name: cleanItemName(mCount[2])};
+    }
+    
+    return {amt: 0, name: cleanItemName(seg)};
   });
 }
 
 function aggregate(items){
   const sand = new Map(), bulk = new Map(), unknown = [];
+
   items.forEach(it => {
     if (it.sandText){
       parseSand(it.sandText).forEach(p => {
-        const k = keyOf(p.name), e = sand.get(k) || {name:p.name, qty:0};
-        e.qty += p.qty; sand.set(k, e);
+        const k = keyOf(p.name);
+        const e = sand.get(k) || {name: p.name, qty: 0};
+        e.qty += p.qty;
+        sand.set(k, e);
       });
     }
+
     if (it.bulkText){
       parseBulk(it.bulkText).forEach(p => {
-        if (!p.amt){ unknown.push(p.name + ' (' + it.name + ')'); return; }
-        const k = keyOf(p.name), e = bulk.get(k) || {name:p.name, amt:0};
-        e.amt += p.amt; bulk.set(k, e);
+        if (p.amt > 0){
+          const k = keyOf(p.name);
+          const e = bulk.get(k) || {name: p.name, amt: 0};
+          e.amt += p.amt;
+          bulk.set(k, e);
+        } else if (p.countQty){
+          // لو طلب عيش بالعدد جوه العلب
+          const k = keyOf(p.name);
+          const e = sand.get(k) || {name: p.name, qty: 0};
+          e.qty += p.countQty;
+          sand.set(k, e);
+        } else {
+          unknown.push(p.name + ' (' + it.name + ')');
+        }
       });
     }
   });
+
   return {
     sand: [...sand.values()].sort((a,b) => b.qty - a.qty),
     bulk: [...bulk.values()].sort((a,b) => b.amt - a.amt),
@@ -362,8 +413,8 @@ function buildSummary(){
   const d = new Date().toLocaleDateString('ar-EG', {weekday:'long', day:'numeric', month:'long'});
   let t = MEALS[meal].icon + ' طلب ' + MEALS[meal].label + ' - ' + d + '\n';
   
-  const titleCategory = meal === 'dinner' ? 'الوجبات والأصناف:' : 'السندوتشات:';
-  const unitLabel = meal === 'dinner' ? ' صنف / وجبة' : ' سندوتش';
+  const titleCategory = meal === 'dinner' ? 'الوجبات والأصناف:' : 'السندوتشات والعيش:';
+  const unitLabel = meal === 'dinner' ? ' صنف / وجبة' : ' طلب / سندوتش';
 
   if (a.sand.length){
     t += '\n' + (meal === 'dinner' ? '🍔 ' : '🥪 ') + titleCategory + '\n' + a.sand.map(s => '• ' + s.qty + ' ' + s.name).join('\n') + '\n';
@@ -421,8 +472,8 @@ function calculateAndDisplaySummary(){
   }
   const a = aggregate(state.items);
   let h = '';
-  const titleCategory = meal === 'dinner' ? '🍔 الوجبات والأصناف' : '🥪 السندوتشات';
-  const unitLabel = meal === 'dinner' ? ' صنف / وجبة' : ' سندوتش';
+  const titleCategory = meal === 'dinner' ? '🍔 الوجبات والأصناف' : '🥪 السندوتشات والعيش';
+  const unitLabel = meal === 'dinner' ? ' صنف / وجبة' : ' طلب / سندوتش';
 
   if (a.sand.length){
     h += '<div class="card"><h2>' + titleCategory + '</h2><ul class="agg">' +
@@ -430,7 +481,7 @@ function calculateAndDisplaySummary(){
       '</ul><div class="total">الإجمالي: ' + a.sand.reduce((x,s) => x + s.qty, 0) + unitLabel + '</div></div>';
   }
   if (a.bulk.length){
-    h += '<div class="card"><h2>🥡 العلب والأكياس</h2><ul class="agg">' +
+    h += '<div class="card"><h2>🥡 العلب والأكياس (بالجنيه)</h2><ul class="agg">' +
       a.bulk.map(b => '<li><span>' + esc(b.name) + '</span><b>إجمالي ' + fmt(b.amt) + ' جنيه</b></li>').join('') +
       '</ul><div class="total">الإجمالي: ' + fmt(a.bulk.reduce((x,b) => x + b.amt, 0)) + ' جنيه</div></div>';
   }
@@ -493,7 +544,6 @@ function renderDeliver(){
     card.querySelector('[data-deliver]').onclick = ev => {
       ev.currentTarget.disabled = true;
       const pay = payChoice[id] || 'cash';
-      // اختفاء فوري ناعم بدون ثقل
       card.classList.add('fade');
       setTimeout(async () => {
         await mutate(cur => {
@@ -537,12 +587,12 @@ function renderAllOrders(){
   p.innerHTML = h;
 }
 
-/* ---------- دالة تحميل الموظف للتعديل ---------- */
+/* ---------- دالة تحميل الموظف للتعديل عند الضغط على ✏️ ---------- */
 function loadWorkerForEdit(id){
   const it = state.items.find(x => x.id === id);
   if (!it) return;
 
-  currentActiveId = id;
+  editingId = id;
   $('fName').value = it.name;
   $('fSand').value = it.sandText || '';
   $('fBulk').value = it.bulkText || '';
@@ -555,32 +605,16 @@ function loadWorkerForEdit(id){
   $('formTitle').textContent = '✏️ تعديل طلب (' + it.name + ')';
   $('savePersonBtn').textContent = '💾 حفظ التعديل';
   $('savePersonBtn').className = 'btn warn';
-  $('newPersonBtn').classList.remove('hidden');
 
   $('formCard').scrollIntoView({ behavior: 'smooth' });
-  toast('✏️ البيانات معروضة للتعديل', 'info');
-}
-
-/* ---------- دالة بدء موظف جديد ---------- */
-function startNewPerson(){
-  currentActiveId = null;
-  $('fName').value = '';
-  $('fSand').value = '';
-  $('fBulk').value = '';
-  $('formTitle').textContent = '➕ تسجيل طلب موظف';
-  $('savePersonBtn').textContent = '💾 حفظ الطلب';
-  $('savePersonBtn').className = 'btn ok';
-  $('newPersonBtn').classList.add('hidden');
   $('fName').focus();
-  toast('✨ جاهز لتسجيل موظف جديد');
+  toast('✏️ جاري تعديل طلب: ' + it.name, 'info');
 }
-
-$('newPersonBtn').addEventListener('click', startNewPerson);
 
 // دالة حذف موظف مسجل
 async function deleteWorker(id){
   if (!confirm('هل تريد حذف هذا الطلب من القائمة؟')) return;
-  if (currentActiveId === id) startNewPerson();
+  if (editingId === id) resetFormToNew();
   await mutate(cur => {
     cur.items = cur.items.filter(x => x.id !== id);
     return cur;
@@ -609,7 +643,19 @@ $('typeSeg').addEventListener('click', e => {
   setOrderTypeUI(empType);
 });
 
-/* ---------- حفظ أو تعديل الطلب ---------- */
+// إعادة الفورم للوضع الافتراضي للشخص الجديد
+function resetFormToNew(){
+  editingId = null;
+  $('fName').value = '';
+  $('fSand').value = '';
+  $('fBulk').value = '';
+  $('formTitle').textContent = '➕ تسجيل طلب موظف';
+  $('savePersonBtn').textContent = '💾 حفظ الطلب';
+  $('savePersonBtn').className = 'btn ok';
+  $('fName').focus();
+}
+
+/* ---------- حفظ الطلب والتفريغ الفوري للشخص التالي ---------- */
 $('savePersonBtn').addEventListener('click', async () => {
   const name = $('fName').value.trim();
   const sandText = $('fSand').value.trim();
@@ -629,10 +675,11 @@ $('savePersonBtn').addEventListener('click', async () => {
   btn.disabled = true;
 
   try{
-    if (currentActiveId){
+    if (editingId){
+      // وضع تعديل موظف قائم
       await mutate(cur => {
         cur.items = cur.items.map(x => {
-          if (x.id === currentActiveId){
+          if (x.id === editingId){
             return {
               ...x,
               name,
@@ -645,8 +692,10 @@ $('savePersonBtn').addEventListener('click', async () => {
         });
         return cur;
       });
-      toast('✅ تم تحديث طلب (' + name + ')!');
+      toast('✅ تم تحديث طلب (' + name + ') بنجاح!');
+      resetFormToNew();
     } else {
+      // وضع إضافة موظف جديد
       const newId = 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
       const newItem = {
         id: newId,
@@ -664,13 +713,9 @@ $('savePersonBtn').addEventListener('click', async () => {
         return cur;
       });
 
-      currentActiveId = newId;
-      $('formTitle').textContent = '✏️ تم حفظ (' + name + ')';
-      $('savePersonBtn').textContent = '💾 حفظ التعديل';
-      $('savePersonBtn').className = 'btn warn';
-      $('newPersonBtn').classList.remove('hidden');
-
-      toast('💾 تم الحفظ! البيانات لسه قدامك، أو اضغط "موظف جديد" للي بعده.');
+      // تفريغ فوري للخانات والتركيز التلقائي على خانة الاسم للشخص اللي بعده!
+      resetFormToNew();
+      toast('💾 تم حفظ (' + name + ')! اكتب الشخص اللي بعده.');
     }
   }catch(e){
     console.error(e);
@@ -689,7 +734,7 @@ document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click
 document.querySelectorAll('.meals button').forEach(b => b.addEventListener('click', () => {
   if (meal === b.dataset.meal) return;
   meal = b.dataset.meal; 
-  startNewPerson();
+  resetFormToNew();
   isSummaryCalculated = false;
   $('summaryResultsContainer').innerHTML = '<div class="card empty">اضغط على الزرار بالأعلى لتجميع وحساب إجمالي الأصناف والفلوس.</div>';
   updateMealUI();
@@ -711,7 +756,7 @@ $('resetBtn').addEventListener('click', async () => {
         });
       } catch(e){}
     }
-    startNewPerson();
+    resetFormToNew();
     isSummaryCalculated = false;
     $('summaryResultsContainer').innerHTML = '<div class="card empty">اضغط على الزرار بالأعلى لتجميع وحساب إجمالي الأصناف والفلوس.</div>';
     await mutate(c => ({items:[]}));
