@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>رادار أوردرات الشغل (فطار وعشاء)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-color:#0b0f19;--bg-secondary:#131a26;--card-bg:#1a2332;
+  --text-color:#f3f4f6;--text-secondary:#b0b8c6;
+  --primary-neon:#00f2fe;--secondary-neon:#4facfe;--accent-purple:#7f00ff;
+  --danger-color:#ff4757;--success-color:#2ed573;--warning-color:#ffa502;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{font-family:'Cairo','Inter',sans-serif;background:var(--bg-color);color:var(--text-color);min-height:100vh;
+  background-image:radial-gradient(circle at 85% -10%,rgba(127,0,255,.22),transparent 45%),radial-gradient(circle at 10% 110%,rgba(0,242,254,.14),transparent 45%);
+  background-attachment:fixed;line-height:1.7;padding-bottom:env(safe-area-inset-bottom,0)}
+.wrap{max-width:720px;margin:0 auto;padding:16px 14px 40px}
+h1{font-size:1.35rem;font-weight:900;text-align:center;margin:6px 0 14px;color:var(--primary-neon);text-shadow:0 0 14px rgba(0,242,254,.55)}
+h2{font-size:1.05rem;font-weight:700;margin-bottom:10px}
+.hidden{display:none!important}
+
+/* meal switch */
+.meals{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--bg-secondary);padding:6px;border-radius:16px;border:1px solid rgba(79,172,254,.25);margin-bottom:16px}
+.meals button{font:inherit;font-weight:700;padding:11px 6px;border:0;border-radius:12px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:.25s}
+.meals button.on{background:linear-gradient(135deg,var(--primary-neon),var(--secondary-neon));color:#04121a;box-shadow:0 0 18px rgba(0,242,254,.5)}
+
+/* cards */
+.card{background:rgba(26,35,50,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(0,242,254,.28);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 0 0 1px rgba(127,0,255,.08),0 8px 28px rgba(0,0,0,.35);transition:.3s}
+.alert{border-color:var(--danger-color);background:rgba(255,71,87,.12);color:#ffd5d9;font-weight:700;text-align:center;box-shadow:0 0 18px rgba(255,71,87,.35)}
+.muted{color:var(--text-secondary);font-size:.9rem}
+.empty{text-align:center;color:var(--text-secondary);padding:26px 8px}
+
+/* form */
+label{display:block;font-weight:600;margin:12px 0 6px;font-size:.95rem}
+input[type=text],textarea{width:100%;font:inherit;color:var(--text-color);background:var(--bg-secondary);border:1px solid rgba(79,172,254,.35);border-radius:12px;padding:11px 13px;outline:none;transition:.25s}
+textarea{min-height:96px;resize:vertical}
+input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px rgba(0,242,254,.4)}
+fieldset{border:0;min-width:0}fieldset:disabled{opacity:.45;pointer-events:none}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button,.pill{font:inherit;font-weight:600;padding:10px 6px;border-radius:12px;border:1px solid rgba(79,172,254,.35);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;transition:.2s}
+.seg button.on,.pill.on{border-color:var(--primary-neon);color:var(--primary-neon);background:rgba(0,242,254,.1);box-shadow:0 0 12px rgba(0,242,254,.35)}
+.btn{font:inherit;font-weight:700;border:0;border-radius:12px;padding:11px 14px;cursor:pointer;color:#04121a;background:linear-gradient(135deg,var(--primary-neon),var(--secondary-neon));transition:.2s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:hover{transform:translateY(-2px);box-shadow:0 0 18px rgba(0,242,254,.6)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.5;pointer-events:none}
+.btn.block{width:100%;margin-top:16px;padding:13px}
+.btn.ghost{background:transparent;color:var(--text-color);border:1px solid rgba(79,172,254,.45)}
+.btn.purple{background:linear-gradient(135deg,var(--accent-purple),var(--secondary-neon));color:#fff}
+.btn.danger{background:transparent;color:var(--danger-color);border:1px solid var(--danger-color)}
+.btn.danger:hover{box-shadow:0 0 16px rgba(255,71,87,.55)}
+.btn.ok{background:linear-gradient(135deg,var(--success-color),#26d0a0)}
+.btn.warn{background:linear-gradient(135deg,var(--warning-color),#ffc048)}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.row>.btn{flex:1 1 140px}
+.badge{display:inline-block;padding:3px 12px;border-radius:99px;font-weight:700;font-size:.9rem;border:1px solid}
+.badge.open{color:var(--success-color);border-color:var(--success-color);background:rgba(46,213,115,.1)}
+.badge.closed{color:var(--danger-color);border-color:var(--danger-color);background:rgba(255,71,87,.1)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+
+/* tabs */
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0 14px}
+.tabs button{font:inherit;font-weight:700;padding:11px 6px;border-radius:12px;border:1px solid rgba(127,0,255,.5);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;transition:.2s}
+.tabs button.on{background:linear-gradient(135deg,var(--accent-purple),var(--secondary-neon));color:#fff;box-shadow:0 0 16px rgba(127,0,255,.5)}
+
+/* aggregation */
+.agg{list-style:none}
+.agg li{display:flex;justify-content:space-between;gap:10px;padding:9px 4px;border-bottom:1px dashed rgba(176,184,198,.2)}
+.agg li:last-child{border:0}
+.agg b{color:var(--primary-neon);white-space:nowrap}
+.total{margin-top:8px;text-align:left;font-weight:900;color:var(--warning-color)}
+
+/* worker cards */
+.wcard{max-height:420px;overflow:hidden;transition:opacity .35s,transform .35s,max-height .4s .1s,padding .4s .1s,margin .4s .1s,border-width .4s .1s}
+.wcard.fade{opacity:0;transform:translateX(-50px) scale(.95);max-height:0;padding-top:0;padding-bottom:0;margin-bottom:0;border-width:0}
+.wcard .name{font-weight:900;font-size:1.1rem}
+.wcard .items{background:var(--bg-secondary);border-radius:10px;padding:9px 12px;margin:8px 0;white-space:pre-wrap;word-break:break-word}
+.tag{font-size:.78rem;padding:1px 9px;border-radius:99px;background:rgba(127,0,255,.25);color:#d6b8ff;margin-inline-start:6px}
+.pays{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.counter{text-align:center;font-weight:700;color:var(--warning-color);margin-bottom:12px}
+.party{text-align:center;border-color:var(--success-color);box-shadow:0 0 28px rgba(46,213,115,.4);font-size:1.15rem;font-weight:900;padding:28px 14px;animation:pop .6s}
+@keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(5,8,14,.78);backdrop-filter:blur(5px);display:flex;align-items:flex-end;justify-content:center;z-index:50;padding:0}
+.modal .box{background:var(--card-bg);border:1px solid var(--primary-neon);border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:88vh;overflow:auto;padding:18px;box-shadow:0 0 28px rgba(0,242,254,.35);animation:up .3s}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@media(min-width:600px){.modal{align-items:center}.modal .box{border-radius:20px}}
+.sheet-row{padding:9px 0;border-bottom:1px dashed rgba(176,184,198,.2)}
+.sheet-row .ok-t{color:var(--success-color)}.sheet-row .wait-t{color:var(--warning-color)}
+
+/* toast */
+#toasts{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;width:min(92vw,420px);pointer-events:none}
+.toast{background:var(--card-bg);border:1px solid var(--success-color);border-radius:14px;padding:11px 14px;font-weight:700;text-align:center;box-shadow:0 0 18px rgba(46,213,115,.4);animation:tin .3s;transition:.4s}
+.toast.error{border-color:var(--danger-color);box-shadow:0 0 18px rgba(255,71,87,.4)}
+.toast.info{border-color:var(--secondary-neon);box-shadow:0 0 18px rgba(79,172,254,.4)}
+.toast.out{opacity:0;transform:translateY(-12px)}
+@keyframes tin{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+
+.foot{text-align:center;margin-top:24px}
+.foot a{color:var(--text-secondary);font-size:.85rem;text-decoration:none;opacity:.7;cursor:pointer}
+.foot a:hover{opacity:1;color:var(--primary-neon)}
+button:focus-visible,a:focus-visible{outline:2px solid var(--primary-neon);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="toasts" aria-live="polite"></div>
+<div class="wrap">
+  <h1>📡 رادار أوردرات الشغل (فطار وعشاء)</h1>
+
+  <div class="meals" role="tablist">
+    <button id="mb-breakfast" data-meal="breakfast">🥪 أوردر الفطار</button>
+    <button id="mb-dinner" data-meal="dinner">🍔 أوردر العشاء / الغداء</button>
+  </div>
+
+  <!-- ============ EMPLOYEE VIEW ============ -->
+  <section id="empView">
+    <div id="lockAlert" class="card alert hidden">🔒 تم قفل الأوردر، المسؤول نزل يشتري الطلبات</div>
+    <div class="card">
+      <h2 id="empTitle">سجّل طلبك</h2>
+      <p class="muted" id="empCount"></p>
+      <fieldset id="formSet">
+        <label for="fName">الاسم</label>
+        <input type="text" id="fName" placeholder="مثال: يوسف محمود" autocomplete="name" maxlength="60">
+        <label>نوع الطلب</label>
+        <div class="seg" id="typeSeg">
+          <button type="button" data-type="sandwich" class="on">🥪 سندوتشات بالعدد</button>
+          <button type="button" data-type="bulk">🥡 علب وأكياس بالجنيه</button>
+        </div>
+        <div id="boxSand">
+          <label for="fSand">السندوتشات (بالعدد)</label>
+          <textarea id="fSand" placeholder="2 فول زيت حار، 1 طعمية محشية"></textarea>
+        </div>
+        <div id="boxBulk" class="hidden">
+          <label for="fBulk">العلب والأكياس (بالجنيه)</label>
+          <textarea id="fBulk" placeholder="بـ 15 فول، بـ 10 طعمية، 5 عيش"></textarea>
+        </div>
+        <button class="btn block" id="submitBtn" type="button">إرسال الطلب</button>
+      </fieldset>
+    </div>
+  </section>
+
+  <!-- ============ SUPERVISOR VIEW ============ -->
+  <section id="admView" class="hidden">
+    <div class="card">
+      <div class="top">
+        <div>الحالة: <span id="statusBadge" class="badge open">مفتوح 🟢</span></div>
+        <button class="btn ghost" id="backBtn" type="button">↩ رجوع لشاشة الموظف</button>
+      </div>
+      <div class="row">
+        <button class="btn warn" id="lockBtn" type="button">🔒 قفل الأوردر</button>
+        <button class="btn purple" id="addBtn" type="button">➕ إضافة موظف يدوياً</button>
+        <button class="btn ghost" id="linkBtn" type="button">🔗 نسخ رابط الأوردر للواتساب</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button id="tb-cashier" data-tab="cashier" class="on">عند الكاشير 🛒</button>
+      <button id="tb-deliver" data-tab="deliver">وقت التوزيع 📦</button>
+    </div>
+
+    <div id="paneCashier"></div>
+    <div id="paneDeliver" class="hidden"></div>
+
+    <div class="row" style="margin-top:6px">
+      <button class="btn ghost" id="sheetBtn" type="button">📜 ورقة الأوردر الأخيرة (سجل 24 ساعة)</button>
+      <button class="btn danger" id="resetBtn" type="button">🗑️ بدء أوردر يوم جديد</button>
+    </div>
+  </section>
+
+  <div class="foot"><a id="adminLink" role="button" tabindex="0">🔑 دخول المشرف / المسؤول</a></div>
+</div>
+
+<!-- Modals -->
+<div class="modal hidden" id="mPin"><div class="box">
+  <h2>🔑 دخول المشرف</h2>
+  <label for="pinIn">الرقم السري</label>
+  <input type="text" id="pinIn" inputmode="numeric" autocomplete="off" placeholder="••••" style="-webkit-text-security:disc">
+  <div class="row" style="margin-top:14px"><button class="btn" id="pinOk" type="button">دخول</button><button class="btn ghost" data-close type="button">إلغاء</button></div>
+</div></div>
+
+<div class="modal hidden" id="mAdd"><div class="box">
+  <h2>➕ إضافة موظف يدوياً</h2>
+  <label for="aName">الاسم</label>
+  <input type="text" id="aName" placeholder="اسم الموظف" maxlength="60">
+  <label>نوع الطلب</label>
+  <div class="seg" id="aSeg">
+    <button type="button" data-type="sandwich" class="on">🥪 سندوتشات بالعدد</button>
+    <button type="button" data-type="bulk">🥡 علب وأكياس بالجنيه</button>
+  </div>
+  <label for="aDet" id="aLbl">التفاصيل</label>
+  <textarea id="aDet" placeholder="2 فول زيت حار، 1 طعمية محشية"></textarea>
+  <div class="row" style="margin-top:14px"><button class="btn" id="aOk" type="button">حفظ الطلب</button><button class="btn ghost" data-close type="button">إلغاء</button></div>
+</div></div>
+
+<div class="modal hidden" id="mSheet"><div class="box">
+  <h2>📜 ورقة الأوردر</h2>
+  <div id="sheetBody"></div>
+  <div class="row" style="margin-top:14px"><button class="btn ghost" data-close type="button">إغلاق</button></div>
+</div></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+"use strict";
+const firebaseConfig = {
+  apiKey: "AIzaSyBfOJPkWbmcJ6s29bDNysr-H0Kx-Js3Gy0",
+  authDomain: "am--rewards.firebaseapp.com",
+  databaseURL: "https://am--rewards-default-rtdb.firebaseio.com",
+  projectId: "am--rewards",
+  storageBucket: "am--rewards.firebasestorage.app",
+  messagingSenderId: "744783579735",
+  appId: "1:744783579735:web:45e00de9998893bbc9b112"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ADMIN_PIN = '1234';
+const MEALS = {
+  breakfast: {label:'الفطار', icon:'🥪', doc:'active_breakfast'},
+  dinner:    {label:'العشاء / الغداء', icon:'🍔', doc:'active_dinner'}
+};
+let meal = 'breakfast', unsub = null, isAdmin = false, tab = 'cashier';
+let state = {isLocked:false, items:[]};
+const payChoice = {};           // itemId -> 'cash' | 'instapay'
+let empType = 'sandwich', addType = 'sandwich';
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+};
+
+function toast(msg, kind){
+  const t = document.createElement('div');
+  t.className = 'toast ' + (kind || '');
+  t.textContent = msg;
+  $('toasts').appendChild(t);
+  setTimeout(() => t.classList.add('out'), 2600);
+  setTimeout(() => t.remove(), 3100);
+}
+function openM(id){ $(id).classList.remove('hidden'); }
+function closeM(id){ $(id).classList.add('hidden'); }
+document.querySelectorAll('.modal').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.add('hidden'); });
+  m.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => m.classList.add('hidden')));
+});
+
+async function copyText(text){
+  try{
+    if (navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(text); return true; }
+  }catch(e){}
+  try{
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy'); ta.remove(); return ok;
+  }catch(e){ return false; }
+}
+
+/* ---------- firestore ---------- */
+const ref = (m) => db.collection('work_orders').doc(MEALS[m || meal].doc);
+function normalize(d){
+  d = d || {};
+  return {
+    isLocked: !!d.isLocked,
+    items: Array.isArray(d.items) ? d.items : [],
+    completedAt: d.completedAt || null
+  };
+}
+function listen(){
+  if (unsub){ unsub(); unsub = null; }
+  state = {isLocked:false, items:[]};
+  render();
+  unsub = ref().onSnapshot(
+    snap => { state = snap.exists ? normalize(snap.data()) : {isLocked:false, items:[]}; render(); },
+    err => { console.error(err); toast('❌ مشكلة في الاتصال بقاعدة البيانات', 'error'); }
+  );
+}
+// Safe read-modify-write (transaction) so simultaneous employees never overwrite each other
+async function mutate(fn){
+  const r = ref();
+  await db.runTransaction(async tx => {
+    const snap = await tx.get(r);
+    const cur = snap.exists ? normalize(snap.data()) : {isLocked:false, items:[], completedAt:null};
+    const next = fn(cur);
+    tx.set(r, {
+      isLocked: !!next.isLocked,
+      items: next.items,
+      completedAt: next.completedAt || null,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, {merge:true});
+  });
+}
+
+/* ---------- parsing & aggregation ---------- */
+const AR_DIGITS = '٠١٢٣٤٥٦٧٨٩';
+const toEn = s => String(s).replace(/[٠-٩]/g, d => AR_DIGITS.indexOf(d)).replace(/٫/g,'.');
+const keyOf = s => s.replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ـ/g,'').replace(/\s+/g,' ').trim().toLowerCase();
+const splitSegs = t => toEn(t).split(/[,،\n+؛;]| و /).map(s => s.trim()).filter(Boolean);
+
+function parseSand(text){
+  return splitSegs(text).map(seg => {
+    let m = seg.match(/^(\d+)\s*(?:x|×)?\s*(.*)$/i);
+    if (m) return {qty:+m[1], name:m[2].trim() || 'غير محدد'};
+    m = seg.match(/^(.*?)\s*(?:x|×)\s*(\d+)$/i);
+    if (m) return {qty:+m[2], name:m[1].trim() || 'غير محدد'};
+    return {qty:1, name:seg};
+  });
+}
+function parseBulk(text){
+  return splitSegs(text).map(seg => {
+    seg = seg.replace(/^ب\u0640*\s*(?=\d)/, '');
+    let m = seg.match(/^(\d+(?:\.\d+)?)\s*(?:جنيه|جنية|ج|egp)?\s*(.*)$/i);
+    if (m) return {amt:+m[1], name:m[2].trim() || 'غير محدد'};
+    m = seg.match(/^(.*?)\s*(\d+(?:\.\d+)?)\s*(?:جنيه|جنية|ج|egp)?$/i);
+    if (m) return {amt:+m[2], name:m[1].trim() || 'غير محدد'};
+    return {amt:0, name:seg};
+  });
+}
+function aggregate(items){
+  const sand = new Map(), bulk = new Map(), unknown = [];
+  items.forEach(it => {
+    if (it.type === 'bulk'){
+      parseBulk(it.details || '').forEach(p => {
+        if (!p.amt){ unknown.push(p.name + ' (' + it.name + ')'); return; }
+        const k = keyOf(p.name), e = bulk.get(k) || {name:p.name, amt:0};
+        e.amt += p.amt; bulk.set(k, e);
+      });
+    } else {
+      parseSand(it.details || '').forEach(p => {
+        const k = keyOf(p.name), e = sand.get(k) || {name:p.name, qty:0};
+        e.qty += p.qty; sand.set(k, e);
+      });
+    }
+  });
+  return {
+    sand: [...sand.values()].sort((a,b) => b.qty - a.qty),
+    bulk: [...bulk.values()].sort((a,b) => b.amt - a.amt),
+    unknown
+  };
+}
+const fmt = n => (Math.round(n * 100) / 100).toLocaleString('en-US');
+function buildSummary(){
+  const a = aggregate(state.items);
+  const d = new Date().toLocaleDateString('ar-EG', {weekday:'long', day:'numeric', month:'long'});
+  let t = MEALS[meal].icon + ' طلب ' + MEALS[meal].label + ' - ' + d + '\n';
+  if (a.sand.length){
+    t += '\n🥪 السندوتشات:\n' + a.sand.map(s => '• ' + s.qty + ' ' + s.name).join('\n') + '\n';
+    t += 'الإجمالي: ' + a.sand.reduce((x,s) => x + s.qty, 0) + ' سندوتش\n';
+  }
+  if (a.bulk.length){
+    t += '\n🥡 العلب والأكياس:\n' + a.bulk.map(b => '• ' + b.name + ': إجمالي ' + fmt(b.amt) + ' جنيه').join('\n') + '\n';
+    t += 'الإجمالي: ' + fmt(a.bulk.reduce((x,b) => x + b.amt, 0)) + ' جنيه\n';
+  }
+  if (a.unknown.length) t += '\n⚠️ بدون سعر واضح:\n' + a.unknown.map(u => '• ' + u).join('\n') + '\n';
+  return t.trim();
+}
+
+/* ---------- rendering ---------- */
+function render(){
+  document.querySelectorAll('.meals button').forEach(b => b.classList.toggle('on', b.dataset.meal === meal));
+  const n = state.items.length;
+  $('empTitle').textContent = MEALS[meal].icon + ' سجّل طلب ' + MEALS[meal].label;
+  $('empCount').textContent = n ? 'عدد الطلبات المسجلة لحد دلوقتي: ' + n : 'لسه مفيش طلبات، كن أول واحد!';
+  $('lockAlert').classList.toggle('hidden', !state.isLocked);
+  $('formSet').disabled = state.isLocked;
+  if (isAdmin) renderAdmin();
+}
+function renderAdmin(){
+  const L = state.isLocked;
+  const sb = $('statusBadge');
+  sb.textContent = L ? 'مغلق 🔒' : 'مفتوح 🟢';
+  sb.className = 'badge ' + (L ? 'closed' : 'open');
+  $('lockBtn').textContent = L ? '🔓 فتح الأوردر' : '🔒 قفل الأوردر';
+  $('lockBtn').className = 'btn ' + (L ? 'ok' : 'warn');
+  $('tb-cashier').classList.toggle('on', tab === 'cashier');
+  $('tb-deliver').classList.toggle('on', tab === 'deliver');
+  $('paneCashier').classList.toggle('hidden', tab !== 'cashier');
+  $('paneDeliver').classList.toggle('hidden', tab !== 'deliver');
+  if (tab === 'cashier') renderCashier(); else renderDeliver();
+}
+function renderCashier(){
+  const p = $('paneCashier');
+  if (!state.items.length){
+    p.innerHTML = '<div class="card empty">📭 لسه مفيش طلبات متسجلة في أوردر ' + esc(MEALS[meal].label) + '.</div>';
+    return;
+  }
+  const a = aggregate(state.items);
+  let h = '';
+  if (a.sand.length){
+    h += '<div class="card"><h2>🥪 السندوتشات</h2><ul class="agg">' +
+      a.sand.map(s => '<li><span>' + esc(s.name) + '</span><b>' + s.qty + '</b></li>').join('') +
+      '</ul><div class="total">الإجمالي: ' + a.sand.reduce((x,s) => x + s.qty, 0) + ' سندوتش</div></div>';
+  }
+  if (a.bulk.length){
+    h += '<div class="card"><h2>🥡 العلب والأكياس</h2><ul class="agg">' +
+      a.bulk.map(b => '<li><span>' + esc(b.name) + '</span><b>إجمالي ' + fmt(b.amt) + ' جنيه</b></li>').join('') +
+      '</ul><div class="total">الإجمالي: ' + fmt(a.bulk.reduce((x,b) => x + b.amt, 0)) + ' جنيه</div></div>';
+  }
+  if (a.unknown.length){
+    h += '<div class="card"><h2>⚠️ بدون سعر واضح</h2><ul class="agg">' +
+      a.unknown.map(u => '<li><span>' + esc(u) + '</span></li>').join('') + '</ul></div>';
+  }
+  h += '<div class="row" style="margin-bottom:14px"><button class="btn" id="copySum" type="button">📋 نسخ ملخص المطعم</button>' +
+       '<button class="btn ok" id="waSum" type="button">💬 إرسال للمطعم عبر واتساب</button></div>';
+  p.innerHTML = h;
+  $('copySum').onclick = async () => toast(await copyText(buildSummary()) ? '📋 تم نسخ الملخص' : '❌ تعذر النسخ', 'info');
+  $('waSum').onclick = () => window.open('https://wa.me/?text=' + encodeURIComponent(buildSummary()), '_blank', 'noopener');
+}
+function renderDeliver(){
+  const p = $('paneDeliver');
+  const all = state.items, left = all.filter(i => !i.delivered);
+  if (!all.length){
+    p.innerHTML = '<div class="card empty">📭 مفيش أوردرات للتوزيع لسه.</div>';
+    return;
+  }
+  if (!left.length){
+    p.innerHTML = '<div class="card party">🎉 عاش! كل الناس استلمت وحاسبت والأوردر اتقفل بنجاح</div>';
+    return;
+  }
+  let h = '<div class="counter">متبقي ' + left.length + ' عمال لم يستلموا</div>';
+  left.forEach(it => {
+    const pc = payChoice[it.id] || 'cash';
+    h += '<div class="card wcard" data-id="' + esc(it.id) + '">' +
+      '<div class="name">' + esc(it.name) + '<span class="tag">' + (it.type === 'bulk' ? '🥡 بالجنيه' : '🥪 بالعدد') + '</span></div>' +
+      '<div class="items">' + esc(it.details) + '</div>' +
+      '<div class="pays"><button type="button" class="pill ' + (pc === 'cash' ? 'on' : '') + '" data-pay="cash">💵 كاش</button>' +
+      '<button type="button" class="pill ' + (pc === 'instapay' ? 'on' : '') + '" data-pay="instapay">📱 إنستاباي</button></div>' +
+      '<button type="button" class="btn ok" style="width:100%" data-deliver>استلم وحاسب ✔</button></div>';
+  });
+  p.innerHTML = h;
+  p.querySelectorAll('.wcard').forEach(card => {
+    const id = card.dataset.id;
+    card.querySelectorAll('[data-pay]').forEach(b => b.onclick = () => {
+      payChoice[id] = b.dataset.pay;
+      card.querySelectorAll('[data-pay]').forEach(x => x.classList.toggle('on', x === b));
+    });
+    card.querySelector('[data-deliver]').onclick = ev => {
+      ev.currentTarget.disabled = true;
+      const pay = payChoice[id] || 'cash';
+      card.classList.add('fade');
+      setTimeout(async () => {
+        try{
+          await mutate(cur => {
+            const it = cur.items.find(x => x.id === id);
+            if (it){ it.delivered = true; it.payment = pay; it.deliveredAt = Date.now(); }
+            if (cur.items.length && cur.items.every(x => x.delivered)) cur.completedAt = Date.now();
+            return cur;
+          });
+        }catch(e){ console.error(e); toast('❌ حصلت مشكلة، حاول تاني', 'error'); render(); }
+      }, 380);
+    };
+  });
+}
+
+/* ---------- employee actions ---------- */
+function setType(seg, type, onChange){
+  seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.type === type));
+  onChange(type);
+}
+$('typeSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  empType = b.dataset.type;
+  setType($('typeSeg'), empType, t => {
+    $('boxSand').classList.toggle('hidden', t !== 'sandwich');
+    $('boxBulk').classList.toggle('hidden', t !== 'bulk');
+  });
+});
+function newItem(name, type, details){
+  return {id:'i' + Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+          name, type, details, createdAt:Date.now(), delivered:false, payment:'', deliveredAt:0};
+}
+async function addOrder(name, type, details, byAdmin){
+  await mutate(cur => {
+    if (cur.isLocked && !byAdmin) throw new Error('LOCKED');
+    cur.items = cur.items.concat([newItem(name, type, details)]);
+    cur.completedAt = null;
+    return cur;
+  });
+}
+$('submitBtn').addEventListener('click', async () => {
+  const name = $('fName').value.trim();
+  const details = (empType === 'bulk' ? $('fBulk') : $('fSand')).value.trim();
+  if (!name) return toast('⚠️ اكتب اسمك الأول', 'error');
+  if (!details) return toast('⚠️ اكتب تفاصيل طلبك', 'error');
+  const btn = $('submitBtn'); btn.disabled = true;
+  try{
+    await addOrder(name, empType, details, false);
+    store.set('radar_name', name);
+    $('fSand').value = ''; $('fBulk').value = '';
+    toast('✅ تم تسجيل طلبك بنجاح!');
+  }catch(e){
+    if (e.message === 'LOCKED') toast('🔒 تم قفل الأوردر', 'error');
+    else { console.error(e); toast('❌ مشكلة في الإرسال، حاول تاني', 'error'); }
+  }finally{ btn.disabled = false; }
+});
+
+/* ---------- supervisor actions ---------- */
+$('lockBtn').addEventListener('click', async () => {
+  const want = !state.isLocked;
+  try{ await mutate(cur => { cur.isLocked = want; return cur; }); toast(want ? '🔒 تم قفل الأوردر' : '🔓 تم فتح الأوردر', 'info'); }
+  catch(e){ console.error(e); toast('❌ حصلت مشكلة، حاول تاني', 'error'); }
+});
+$('linkBtn').addEventListener('click', async () => {
+  const u = location.origin + location.pathname + '?meal=' + meal;
+  toast(await copyText(u) ? '🔗 تم نسخ رابط الأوردر، ابعته في الجروپ' : '❌ تعذر النسخ', 'info');
+});
+$('addBtn').addEventListener('click', () => { $('aName').value = ''; $('aDet').value = ''; openM('mAdd'); });
+$('aSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  addType = b.dataset.type;
+  setType($('aSeg'), addType, t => {
+    $('aDet').placeholder = t === 'bulk' ? 'بـ 15 فول، بـ 10 طعمية، 5 عيش' : '2 فول زيت حار، 1 طعمية محشية';
+  });
+});
+$('aOk').addEventListener('click', async () => {
+  const name = $('aName').value.trim(), det = $('aDet').value.trim();
+  if (!name || !det) return toast('⚠️ اكتب الاسم والتفاصيل', 'error');
+  $('aOk').disabled = true;
+  try{ await addOrder(name, addType, det, true); closeM('mAdd'); toast('✅ تم تسجيل الطلب'); }
+  catch(e){ console.error(e); toast('❌ مشكلة في الحفظ', 'error'); }
+  finally{ $('aOk').disabled = false; }
+});
+$('resetBtn').addEventListener('click', async () => {
+  if (!confirm('متأكد إنك عايز تبدأ أوردر يوم جديد؟\nهيتم حفظ الأوردر الحالي في السجل ومسح القائمة.')) return;
+  try{
+    const m = meal, cur = state;
+    if (cur.items.length){
+      await db.collection('work_orders_archive').add({
+        meal: m, items: cur.items, archivedAt: firebase.firestore.FieldValue.serverTimestamp(), archivedMs: Date.now()
+      });
+    }
+    await ref(m).set({isLocked:false, items:[], completedAt:null, updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    toast('🗑️ تم بدء أوردر جديد');
+  }catch(e){ console.error(e); toast('❌ مشكلة في إعادة التعيين', 'error'); }
+});
+
+function sheetHtml(items){
+  return items.map(it => {
+    const st = it.delivered
+      ? '<span class="ok-t">✔ استلم (' + (it.payment === 'instapay' ? '📱 إنستاباي' : '💵 كاش') + ')</span>'
+      : '<span class="wait-t">⏳ لم يستلم</span>';
+    return '<div class="sheet-row"><b>' + esc(it.name) + '</b> — ' + st + '<br><span class="muted">' + esc(it.details) + '</span></div>';
+  }).join('');
+}
+$('sheetBtn').addEventListener('click', async () => {
+  const body = $('sheetBody');
+  body.innerHTML = '<div class="empty">⏳ جاري التحميل...</div>';
+  openM('mSheet');
+  let h = '<h2 style="color:var(--primary-neon)">الأوردر الحالي</h2>' +
+    (state.items.length ? sheetHtml(state.items) : '<div class="empty">لا توجد طلبات حالية</div>');
+  try{
+    const snap = await db.collection('work_orders_archive').where('meal','==',meal).get();
+    const cutoff = Date.now() - 24*60*60*1000;
+    const rows = snap.docs.map(d => d.data()).filter(d => (d.archivedMs || 0) >= cutoff).sort((a,b) => b.archivedMs - a.archivedMs);
+    h += '<h2 style="margin-top:16px;color:var(--secondary-neon)">أوردرات آخر 24 ساعة</h2>';
+    h += rows.length ? rows.map(r => '<div class="muted" style="margin-top:8px">' +
+      new Date(r.archivedMs).toLocaleString('ar-EG') + '</div>' + sheetHtml(r.items || [])).join('')
+      : '<div class="empty">لا يوجد أوردرات سابقة في آخر 24 ساعة</div>';
+  }catch(e){ console.error(e); h += '<div class="empty">❌ تعذر تحميل السجل</div>'; }
+  body.innerHTML = h;
+});
+
+/* ---------- navigation & roles ---------- */
+function showAdmin(on){
+  isAdmin = on;
+  $('empView').classList.toggle('hidden', on);
+  $('admView').classList.toggle('hidden', !on);
+  $('adminLink').parentElement.classList.toggle('hidden', on);
+  render();
+  window.scrollTo({top:0});
+}
+$('adminLink').addEventListener('click', () => { $('pinIn').value = ''; openM('mPin'); setTimeout(() => $('pinIn').focus(), 50); });
+$('adminLink').addEventListener('keydown', e => { if (e.key === 'Enter') $('adminLink').click(); });
+function tryPin(){
+  if ($('pinIn').value.trim() === ADMIN_PIN){ closeM('mPin'); showAdmin(true); }
+  else toast('❌ الرقم السري غلط', 'error');
+}
+$('pinOk').addEventListener('click', tryPin);
+$('pinIn').addEventListener('keydown', e => { if (e.key === 'Enter') tryPin(); });
+$('backBtn').addEventListener('click', () => showAdmin(false));
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => { tab = b.dataset.tab; renderAdmin(); }));
+document.querySelectorAll('.meals button').forEach(b => b.addEventListener('click', () => {
+  if (meal === b.dataset.meal) return;
+  meal = b.dataset.meal; store.set('radar_meal', meal); listen();
+}));
+
+/* ---------- init ---------- */
+(function init(){
+  const q = new URLSearchParams(location.search);
+  const m = q.get('meal') || store.get('radar_meal');
+  if (m && MEALS[m]) meal = m;
+  const saved = store.get('radar_name'); if (saved) $('fName').value = saved;
+  listen();
+  if (q.get('admin') === 'true') showAdmin(true);
+})();
+</script>
+</body>
+</html>
