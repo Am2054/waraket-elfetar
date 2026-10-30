@@ -40,25 +40,31 @@ input[type=text],textarea{width:100%;font:inherit;color:var(--text-color);backgr
 textarea{min-height:80px;resize:vertical}
 input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px rgba(0,242,254,.4)}
 
-/* Segmented Control 3 options */
+/* Segmented Control */
 .seg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
 .seg button,.pill{font:inherit;font-weight:600;padding:10px 4px;border-radius:12px;border:1px solid rgba(79,172,254,.35);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;transition:.2s;font-size:.85rem}
 .seg button.on,.pill.on{border-color:var(--primary-neon);color:var(--primary-neon);background:rgba(0,242,254,.1);box-shadow:0 0 12px rgba(0,242,254,.35)}
 
+/* Buttons */
 .btn{font:inherit;font-weight:700;border:0;border-radius:12px;padding:11px 14px;cursor:pointer;color:#04121a;background:linear-gradient(135deg,var(--primary-neon),var(--secondary-neon));transition:.2s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .btn:hover{transform:translateY(-2px);box-shadow:0 0 18px rgba(0,242,254,.6)}
 .btn:active{transform:translateY(0)}
-.btn.block{width:100%;margin-top:16px;padding:13px}
+.btn:disabled{opacity:.5;pointer-events:none}
 .btn.ghost{background:transparent;color:var(--text-color);border:1px solid rgba(79,172,254,.45)}
-.btn.purple{background:linear-gradient(135deg,var(--accent-purple),var(--secondary-neon));color:#fff}
 .btn.danger{background:transparent;color:var(--danger-color);border:1px solid var(--danger-color)}
-.btn.ok{background:linear-gradient(135deg,var(--success-color),#26d0a0)}
-.btn.warn{background:linear-gradient(135deg,var(--warning-color),#ffc048)}
+.btn.ok{background:linear-gradient(135deg,var(--success-color),#26d0a0);color:#04121a}
+.btn.warn{background:linear-gradient(135deg,var(--warning-color),#ffc048);color:#04121a}
+
+/* Action Icons on Cards */
+.card-actions{display:flex;align-items:center;gap:4px}
+.btn-icon{background:transparent;border:none;font-size:1.05rem;cursor:pointer;padding:4px 6px;border-radius:8px;transition:.2s}
+.btn-icon:hover{background:rgba(255,255,255,.1)}
+.btn-icon.del:hover{background:rgba(255,71,87,.2)}
+
 .row{display:flex;flex-wrap:wrap;gap:8px}
 .row>.btn{flex:1 1 140px}
 .badge{display:inline-block;padding:3px 12px;border-radius:99px;font-weight:700;font-size:.9rem;border:1px solid}
 .badge.open{color:var(--success-color);border-color:var(--success-color);background:rgba(46,213,115,.1)}
-.badge.closed{color:var(--danger-color);border-color:var(--danger-color);background:rgba(255,71,87,.1)}
 .top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
 
 /* tabs */
@@ -110,10 +116,10 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
     <button id="mb-dinner" data-meal="dinner">🍔 أوردر العشاء / الغداء</button>
   </div>
 
-  <!-- كارت إضافة الأشخاص المتتالي (أداة المشرف السريعة) -->
-  <div class="card">
+  <!-- كارت تسجيل وتعديل الطلب -->
+  <div class="card" id="formCard">
     <div class="top">
-      <h2>➕ تسجيل طلب موظف</h2>
+      <h2 id="formTitle">➕ تسجيل طلب موظف</h2>
       <span id="orderCountBadge" class="badge open">0 موظفين</span>
     </div>
 
@@ -139,7 +145,11 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
       <textarea id="fBulk" placeholder="بـ 15 فول، بـ 10 طعمية، 5 عيش"></textarea>
     </div>
 
-    <button class="btn block" id="addPersonBtn" type="button">➕ حفظ وإضافة الشخص اللي بعده</button>
+    <!-- أزرار الإجراءات مع ميزة التعديل الذكية -->
+    <div class="row" style="margin-top:14px">
+      <button class="btn ok" id="savePersonBtn" type="button" style="flex:2">💾 حفظ الطلب</button>
+      <button class="btn danger hidden" id="cancelEditBtn" type="button" style="flex:1">❌ إلغاء التعديل</button>
+    </div>
   </div>
 
   <!-- التبويبات الرئيسية للمشرف -->
@@ -191,6 +201,18 @@ let meal = 'breakfast', unsub = null, tab = 'cashier';
 let state = {items:[]};
 const payChoice = {}; 
 let empType = 'sandwich';
+let editingId = null; // يحمل كود الموظف الجاري تعديله حالياً
+
+const localStore = {
+  get(m){
+    try { return JSON.parse(localStorage.getItem('radar_meal_' + m)) || {items:[]}; }
+    catch(e){ return {items:[]}; }
+  },
+  set(m, data){
+    try { localStorage.setItem('radar_meal_' + m, JSON.stringify(data)); }
+    catch(e){}
+  }
+};
 
 function toast(msg, kind){
   const t = document.createElement('div');
@@ -224,28 +246,38 @@ const ref = (m) => db.collection('work_orders').doc(MEALS[m || meal].doc);
 
 function listen(){
   if (unsub){ unsub(); unsub = null; }
-  state = {items:[]};
+  state = localStore.get(meal);
   render();
-  unsub = ref().onSnapshot(
-    snap => { 
-      state = snap.exists ? {items: Array.isArray(snap.data().items) ? snap.data().items : []} : {items:[]}; 
-      render(); 
-    },
-    err => { console.error(err); toast('❌ مشكلة في الاتصال بقاعدة البيانات', 'error'); }
-  );
+
+  try {
+    unsub = ref().onSnapshot(
+      snap => { 
+        if (snap.exists && Array.isArray(snap.data().items)){
+          state = {items: snap.data().items};
+          localStore.set(meal, state);
+          render();
+        }
+      },
+      err => { console.warn('Firebase notice:', err); }
+    );
+  } catch(e) {}
 }
 
 async function mutate(fn){
-  const r = ref();
-  await db.runTransaction(async tx => {
-    const snap = await tx.get(r);
-    const cur = snap.exists ? {items: Array.isArray(snap.data().items) ? snap.data().items : []} : {items:[]};
-    const next = fn(cur);
-    tx.set(r, {
+  const next = fn(state);
+  state = next;
+  localStore.set(meal, state);
+  render();
+
+  try {
+    const r = ref();
+    await r.set({
       items: next.items,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, {merge:true});
-  });
+  } catch(e) {
+    console.warn('Saved offline:', e);
+  }
 }
 
 /* ---------- التجميع الرياضي الذكي ---------- */
@@ -316,7 +348,7 @@ function buildSummary(){
   return t.trim();
 }
 
-/* ---------- العرض والـ Render ---------- */
+/* ---------- العرض والواجهة ---------- */
 function render(){
   document.querySelectorAll('.meals button').forEach(b => b.classList.toggle('on', b.dataset.meal === meal));
   const n = state.items.length;
@@ -333,7 +365,7 @@ function render(){
 function renderCashier(){
   const p = $('paneCashier');
   if (!state.items.length){
-    p.innerHTML = '<div class="card empty">📭 لسه مفيش موظفين متسجلين في أوردر ' + esc(MEALS[meal].label) + '. ابدأ ضيف أول شخص فوق!</div>';
+    p.innerHTML = '<div class="card empty">📭 لسه مفيش موظفين متسجلين في أوردر ' + esc(MEALS[meal].label) + '. اكتب الاسم والطلب واضغط حفظ!</div>';
     return;
   }
   const a = aggregate(state.items);
@@ -378,13 +410,20 @@ function renderDeliver(){
     if (it.bulkText) detailsHtml += '🥡 ' + esc(it.bulkText);
 
     h += '<div class="card wcard" data-id="' + esc(it.id) + '">' +
-      '<div class="name">' + esc(it.name) + '<span class="tag">' + (it.type === 'mixed' ? '🔀 مكس' : (it.type === 'bulk' ? '🥡 علب' : '🥪 سندوتشات')) + '</span></div>' +
+      '<div class="name">' +
+        '<span>👤 ' + esc(it.name) + ' <span class="tag">' + (it.type === 'mixed' ? '🔀 مكس' : (it.type === 'bulk' ? '🥡 علب' : '🥪 سندوتشات')) + '</span></span>' +
+        '<div class="card-actions">' +
+          '<button class="btn-icon" title="تعديل هذا الطلب" onclick="startEditWorker(\'' + esc(it.id) + '\')">✏️</button>' +
+          '<button class="btn-icon del" title="حذف هذا الطلب" onclick="deleteWorker(\'' + esc(it.id) + '\')">🗑️</button>' +
+        '</div>' +
+      '</div>' +
       '<div class="items">' + detailsHtml + '</div>' +
       '<div class="pays"><button type="button" class="pill ' + (pc === 'cash' ? 'on' : '') + '" data-pay="cash">💵 كاش</button>' +
       '<button type="button" class="pill ' + (pc === 'instapay' ? 'on' : '') + '" data-pay="instapay">📱 إنستاباي</button></div>' +
       '<button type="button" class="btn ok" style="width:100%" data-deliver>استلم وحاسب ✔</button></div>';
   });
   p.innerHTML = h;
+
   p.querySelectorAll('.wcard').forEach(card => {
     const id = card.dataset.id;
     card.querySelectorAll('[data-pay]').forEach(b => b.onclick = () => {
@@ -396,38 +435,89 @@ function renderDeliver(){
       const pay = payChoice[id] || 'cash';
       card.classList.add('fade');
       setTimeout(async () => {
-        try{
-          await mutate(cur => {
-            const it = cur.items.find(x => x.id === id);
-            if (it){ it.delivered = true; it.payment = pay; it.deliveredAt = Date.now(); }
-            return cur;
-          });
-        }catch(e){ console.error(e); toast('❌ حصلت مشكلة، حاول تاني', 'error'); render(); }
+        await mutate(cur => {
+          const it = cur.items.find(x => x.id === id);
+          if (it){ it.delivered = true; it.payment = pay; it.deliveredAt = Date.now(); }
+          return cur;
+        });
       }, 380);
     };
   });
 }
 
-/* ---------- تبديل نوع الطلب (سندوتشات / علب / مكس) ---------- */
-$('typeSeg').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return;
-  empType = b.dataset.type;
-  $('typeSeg').querySelectorAll('button').forEach(btn => btn.classList.toggle('on', btn === b));
-  
-  if (empType === 'sandwich'){
+/* ---------- دالة بدء التعديل (Edit Mode) ---------- */
+function startEditWorker(id){
+  const it = state.items.find(x => x.id === id);
+  if (!it) return;
+
+  editingId = id;
+  $('fName').value = it.name;
+  $('fSand').value = it.sandText || '';
+  $('fBulk').value = it.bulkText || '';
+
+  // تفعيل نوع الطلب المناسب
+  empType = it.type || 'sandwich';
+  setOrderTypeUI(empType);
+
+  // تحديث شكل الأزرار لوضع التعديل
+  $('formTitle').textContent = '✏️ تعديل طلب (' + it.name + ')';
+  $('savePersonBtn').textContent = '💾 حفظ التعديل';
+  $('savePersonBtn').className = 'btn warn';
+  $('cancelEditBtn').classList.remove('hidden');
+
+  // صعود ناعم لأعلى الصفحة عند الفورم
+  $('formCard').scrollIntoView({ behavior: 'smooth' });
+  toast('✏️ جاري تعديل طلب: ' + it.name, 'info');
+}
+
+/* ---------- دالة إلغاء التعديل ---------- */
+function cancelEdit(){
+  editingId = null;
+  $('fName').value = '';
+  $('fSand').value = '';
+  $('fBulk').value = '';
+  $('formTitle').textContent = '➕ تسجيل طلب موظف';
+  $('savePersonBtn').textContent = '💾 حفظ الطلب';
+  $('savePersonBtn').className = 'btn ok';
+  $('cancelEditBtn').classList.add('hidden');
+}
+
+$('cancelEditBtn').addEventListener('click', cancelEdit);
+
+// دالة حذف موظف مسجل
+async function deleteWorker(id){
+  if (!confirm('هل تريد حذف هذا الطلب من القائمة؟')) return;
+  if (editingId === id) cancelEdit(); // لو كان مفتوح في التعديل يلغيه
+  await mutate(cur => {
+    cur.items = cur.items.filter(x => x.id !== id);
+    return cur;
+  });
+  toast('🗑️ تم حذف الطلب بنجاح', 'info');
+}
+
+/* ---------- ضبط واجهة نوع الطلب ---------- */
+function setOrderTypeUI(type){
+  $('typeSeg').querySelectorAll('button').forEach(btn => btn.classList.toggle('on', btn.dataset.type === type));
+  if (type === 'sandwich'){
     $('boxSand').classList.remove('hidden');
     $('boxBulk').classList.add('hidden');
-  } else if (empType === 'bulk'){
+  } else if (type === 'bulk'){
     $('boxSand').classList.add('hidden');
     $('boxBulk').classList.remove('hidden');
-  } else if (empType === 'mixed'){
+  } else if (type === 'mixed'){
     $('boxSand').classList.remove('hidden');
     $('boxBulk').classList.remove('hidden');
   }
+}
+
+$('typeSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  empType = b.dataset.type;
+  setOrderTypeUI(empType);
 });
 
-/* ---------- حفظ موظف وإضافة اللي بعده فوراً ---------- */
-$('addPersonBtn').addEventListener('click', async () => {
+/* ---------- حفظ أو تحديث الطلب ---------- */
+$('savePersonBtn').addEventListener('click', async () => {
   const name = $('fName').value.trim();
   const sandText = $('fSand').value.trim();
   const bulkText = $('fBulk').value.trim();
@@ -435,48 +525,59 @@ $('addPersonBtn').addEventListener('click', async () => {
   if (!name) return toast('⚠️ اكتب اسم الموظف الأول', 'error');
   if (empType === 'sandwich' && !sandText) return toast('⚠️ اكتب السندوتشات المطلوبة', 'error');
   if (empType === 'bulk' && !bulkText) return toast('⚠️ اكتب العلب المطلوبة', 'error');
-  if (empType === 'mixed' && !sandText && !bulkText) return toast('⚠️ اكتب السندوتشات أو العلب المطلوبة', 'error');
+  if (empType === 'mixed' && !sandText && !bulkText) return toast('⚠️ اكتب تفاصيل السندوتشات أو العلب', 'error');
 
-  const btn = $('addPersonBtn'); 
+  const btn = $('savePersonBtn'); 
   btn.disabled = true;
 
-  const newItem = {
-    id: 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2,7),
-    name,
-    type: empType,
-    sandText: (empType === 'sandwich' || empType === 'mixed') ? sandText : '',
-    bulkText: (empType === 'bulk' || empType === 'mixed') ? bulkText : '',
-    delivered: false,
-    payment: '',
-    createdAt: Date.now()
-  };
-
   try{
-    await mutate(cur => {
-      cur.items = cur.items.concat([newItem]);
-      return cur;
-    });
+    if (editingId){
+      // وضع التعديل: تحديث الموظف القائم في مكانه
+      await mutate(cur => {
+        cur.items = cur.items.map(x => {
+          if (x.id === editingId){
+            return {
+              ...x,
+              name,
+              type: empType,
+              sandText: (empType === 'sandwich' || empType === 'mixed') ? sandText : '',
+              bulkText: (empType === 'bulk' || empType === 'mixed') ? bulkText : ''
+            };
+          }
+          return x;
+        });
+        return cur;
+      });
+      toast('✅ تم تحديث طلب (' + name + ') بنجاح!');
+      cancelEdit();
+    } else {
+      // وضع الإضافة الجديدة
+      const newItem = {
+        id: 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+        name,
+        type: empType,
+        sandText: (empType === 'sandwich' || empType === 'mixed') ? sandText : '',
+        bulkText: (empType === 'bulk' || empType === 'mixed') ? bulkText : '',
+        delivered: false,
+        payment: '',
+        createdAt: Date.now()
+      };
 
-    // تفريغ الخانات فوراً لتجهيز كتابة الشخص اللي بعده
-    $('fName').value = '';
-    $('fSand').value = '';
-    $('fBulk').value = '';
-    $('fName').focus(); // التركيز على خانة الاسم للشخص اللي بعده
+      await mutate(cur => {
+        cur.items = cur.items.concat([newItem]);
+        return cur;
+      });
 
-    toast('✅ تم إضافة (' + name + ')! اكتب الشخص اللي بعده.');
+      $('fName').value = '';
+      $('fSand').value = '';
+      $('fBulk').value = '';
+      toast('💾 تم حفظ طلب (' + name + ') بنجاح!');
+    }
   }catch(e){
     console.error(e);
-    toast('❌ مشكلة في الحفظ، حاول تاني', 'error');
+    toast('❌ حصلت مشكلة في الحفظ', 'error');
   }finally{
     btn.disabled = false;
-  }
-});
-
-// السماح بالضغط على Enter في خانة الاسم للتنقل السريع
-$('fName').addEventListener('keydown', e => {
-  if (e.key === 'Enter'){
-    if (empType === 'bulk') $('fBulk').focus();
-    else $('fSand').focus();
   }
 });
 
@@ -489,28 +590,32 @@ document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click
 document.querySelectorAll('.meals button').forEach(b => b.addEventListener('click', () => {
   if (meal === b.dataset.meal) return;
   meal = b.dataset.meal; 
+  if (editingId) cancelEdit();
   listen();
 }));
 
-/* ---------- إعادة التعيين وبدء يوم جديد ---------- */
+/* ---------- بدء أوردر جديد ---------- */
 $('resetBtn').addEventListener('click', async () => {
   if (!confirm('متأكد إنك عايز تبدأ أوردر جديد؟\nهيتم أرشفة الأوردر الحالي وتفريغ القائمة.')) return;
   try{
     const m = meal, cur = state;
     if (cur.items.length){
-      await db.collection('work_orders_archive').add({
-        meal: m, 
-        items: cur.items, 
-        archivedAt: firebase.firestore.FieldValue.serverTimestamp(), 
-        archivedMs: Date.now()
-      });
+      try {
+        await db.collection('work_orders_archive').add({
+          meal: m, 
+          items: cur.items, 
+          archivedAt: firebase.firestore.FieldValue.serverTimestamp(), 
+          archivedMs: Date.now()
+        });
+      } catch(e){}
     }
-    await ref(m).set({items:[], updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    if (editingId) cancelEdit();
+    await mutate(c => ({items:[]}));
     toast('🗑️ تم تفريغ الأوردر وبدء جلسة جديدة');
-  }catch(e){ console.error(e); toast('❌ مشكلة في التعيين', 'error'); }
+  }catch(e){ toast('❌ مشكلة في التعيين', 'error'); }
 });
 
-/* ---------- عرض سجل 24 ساعة ---------- */
+/* ---------- سجل 24 ساعة ---------- */
 function sheetHtml(items){
   return items.map(it => {
     const st = it.delivered
@@ -535,11 +640,13 @@ $('sheetBtn').addEventListener('click', async () => {
     h += rows.length ? rows.map(r => '<div class="muted" style="margin-top:8px">' +
       new Date(r.archivedMs).toLocaleString('ar-EG') + '</div>' + sheetHtml(r.items || [])).join('')
       : '<div class="empty">لا يوجد أوردرات سابقة في آخر 24 ساعة</div>';
-  }catch(e){ console.error(e); h += '<div class="empty">❌ تعذر تحميل السجل</div>'; }
+  }catch(e){
+    h += '<div class="empty muted">عرض السجل المحلي للأوردر الحالي فقط</div>';
+  }
   body.innerHTML = h;
 });
 
-/* ---------- البداية ---------- */
+/* ---------- تشغيل البرنامج ---------- */
 listen();
 </script>
 </body>
