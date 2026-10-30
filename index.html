@@ -43,9 +43,11 @@ input[type=text],textarea{width:100%;font:inherit;color:var(--text-color);backgr
 textarea{min-height:90px;resize:vertical}
 input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px rgba(0,242,254,.4)}
 
-/* Shortcut Hint */
-.shortcuts-hint{background:rgba(0,242,254,.07);border:1px dashed rgba(0,242,254,.3);border-radius:10px;padding:8px 10px;margin:8px 0 12px;font-size:.8rem;color:var(--secondary-neon);display:flex;justify-content:space-around;flex-wrap:wrap;gap:4px}
-.shortcuts-hint span{font-weight:700}
+/* شريط الاختصارات المودرن الفخم */
+.shortcuts-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;background:rgba(19,26,38,.85);border:1px solid rgba(0,242,254,.2);border-radius:12px;padding:8px 12px;margin:8px 0 12px}
+.sc-tag{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:700;color:var(--text-secondary)}
+.sc-key{background:rgba(0,242,254,.15);color:var(--primary-neon);border:1px solid var(--primary-neon);padding:2px 8px;border-radius:6px;font-weight:900;font-size:.85rem;box-shadow:0 0 8px rgba(0,242,254,.3)}
+.sc-default{color:var(--warning-color);font-size:.78rem;font-weight:600}
 
 /* Buttons */
 .btn{font:inherit;font-weight:700;border:0;border-radius:12px;padding:11px 14px;cursor:pointer;color:#04121a;background:linear-gradient(135deg,var(--primary-neon),var(--secondary-neon));transition:.2s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
@@ -132,7 +134,7 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
     <button id="mb-dinner" data-meal="dinner">🍔 أوردر العشاء / الغداء</button>
   </div>
 
-  <!-- كارت تسجيل الطلب النظيف (مربع واحد شامل) -->
+  <!-- كارت تسجيل الطلب -->
   <div class="card" id="formCard">
     <div class="top">
       <h2 id="formTitle">➕ تسجيل طلب موظف</h2>
@@ -142,30 +144,30 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
     <label for="fName">اسم الموظف</label>
     <input type="text" id="fName" placeholder="مثال: أحمد فتحي" maxlength="60">
 
-    <!-- شريط تلميح الحروف (في الفطار فقط) -->
-    <div class="shortcuts-hint" id="shortcutsHint">
-      <span>⚡ س = سندوتش (5 س فول)</span>
-      <span>🥡 ع = علبة (2 ع مسقعة)</span>
-      <span>🛍️ ك = كيس (1 ك طعمية)</span>
-      <span>💵 ج = جنيه (15 ج بطاطس)</span>
+    <!-- شريط الاختصارات المودرن الفخم (في الفطار فقط وبدون كلمة كيس) -->
+    <div class="shortcuts-bar" id="shortcutsBar">
+      <div class="sc-tag"><span class="sc-key">س</span> سندوتش</div>
+      <div class="sc-tag"><span class="sc-key">ع</span> علبة</div>
+      <div class="sc-tag"><span class="sc-key">ج</span> جنيه</div>
+      <div class="sc-default">⚡ بدون حرف = يُحسب بالجنيه تلقائياً</div>
     </div>
 
     <label for="fDetails" id="lblDetails">تفاصيل الطلب بالكامل</label>
-    <textarea id="fDetails" placeholder="اكتب براحتك في مربع واحد: 5 فول 2 طعمية 1 شيبسي 1 كانز بيبسي 1 علبة جبنة"></textarea>
+    <textarea id="fDetails" placeholder="اكتب براحتك: 2 س فول 1 ع مسقعة 15 بطاطس 1 شيبسي 1 كانز بيبسي"></textarea>
 
     <div class="row" style="margin-top:14px">
       <button class="btn ok" id="savePersonBtn" type="button" style="width:100%; padding:13px;">💾 حفظ الطلب</button>
     </div>
   </div>
 
-  <!-- التبويبات -->
+  <!-- التبويبات الثلاثة -->
   <div class="tabs">
     <button id="tb-cashier" data-tab="cashier" class="on">جمع الطلبات 📊</button>
     <button id="tb-deliver" data-tab="deliver">وقت التوزيع 📦</button>
     <button id="tb-all" data-tab="all">كل الأوردرات 📋</button>
   </div>
 
-  <!-- 1. جمع الطلبات (المفروز تلقائياً) -->
+  <!-- 1. جمع وفرز الطلبات -->
   <div id="paneCashier">
     <div style="text-align:center; margin-bottom:14px;">
       <button class="btn warn" id="btnCalculateSummary" type="button" style="width:100%; padding:14px; font-size:1.05rem;">
@@ -182,7 +184,7 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
   <!-- 2. وقت التوزيع -->
   <div id="paneDeliver" class="hidden"></div>
 
-  <!-- 3. كل الأوردرات -->
+  <!-- 3. كل الأوردرات والتعديل -->
   <div id="paneAll" class="hidden"></div>
 
   <div class="row" style="margin-top:14px">
@@ -289,7 +291,7 @@ function listen(){
           if (isSummaryCalculated) calculateAndDisplaySummary();
         }
       },
-      err => { console.warn('Firebase sync notice:', err); }
+      err => { console.warn('Firebase notice:', err); }
     );
   } catch(e) {}
 }
@@ -312,7 +314,7 @@ async function mutate(fn){
   }
 }
 
-/* ---------- القاموس المصري الشامل لتصنيف المحلات (أكثر من 100 كلمة) ---------- */
+/* ---------- القاموس المصري الشامل لتصنيف المحلات ---------- */
 const SUPERMARKET_DICT = [
   'شيبسي', 'تايجر', 'شيتوس', 'دوريتوس', 'كاراتيه', 'بيبيتو', 'شيبس',
   'بيبسي', 'كولا', 'كوكاكولا', 'سفن', 'سبرايت', 'شويبس', 'ميرندا', 'فانتا', 'سبيروسباتس', 'كانز', 'صودا',
@@ -321,7 +323,7 @@ const SUPERMARKET_DICT = [
   'تونة', 'تونه', 'سردين', 'بلوبيف',
   'نسكافيه', 'كوفي ميكس', 'شاي', 'قهوة', 'سكر', 'مياه', 'ميه', 'معدنيه', 'معدنية',
   'امير', 'انبوبة امير', 'سوبر جلو', 'مناديل', 'ولاعه', 'كبريت',
-  'بسكوت', 'شيكولاته', 'شوكولاته', 'ويفر', 'بان كيك', 'مولتو', 'هوهوز', 'توينكيز', 'علكه', 'لبان', 'كلوريتس', 'تريتس', 'شيكولاته'
+  'بسكوت', 'شيكولاته', 'شوكولاته', 'ويفر', 'بان كيك', 'مولتو', 'هوهوز', 'توينكيز', 'علكه', 'لبان', 'كلوريتس', 'تريتس'
 ];
 
 const BAKERY_DICT = [
@@ -352,14 +354,14 @@ function smartSplit(t){
     .filter(Boolean);
 }
 
-// دالة تصنيف الصنف وتطبيق نظام الحروف (في الفطار فقط)
+// دالة فك الصنف الذكية: (س = سندوتش، ع = علبة، ج أو سادة = جنيه)
 function parseRawItem(seg, isBreakfast){
   seg = toEn(seg).trim();
   if (!seg) return null;
 
   let clean = cleanItemName(seg);
 
-  // 1. هل الصنف يتبع المخبز والفطاطري؟
+  // 1. هل الصنف يتبع المخبز؟
   const isBakery = BAKERY_DICT.some(w => clean.includes(w));
   if (isBakery){
     let m = seg.match(/^(\d+)\s*(?:x|×|-)?\s*(.*)$/i);
@@ -377,10 +379,27 @@ function parseRawItem(seg, isBreakfast){
     return { shop: 'supermarket', qty, name };
   }
 
-  // 3. يتبع مطعم الأكل / الفول والطعام:
-  // نظام الحروف (س، ع، ك، ج) يطبق في الفطار فقط
+  // 3. يتبع المطعم الرئيسي
   if (isBreakfast){
-    // فلوس (ج / جنيه / بـ)
+    // أولاً: سندوتشات صريحة بحرف س أو كلمة سندوتش
+    let mSand = seg.match(/^(\d+)\s*(?:س|سندوتش|ساندوتش|سندوتشات)\s+(.*)$/i) ||
+                seg.match(/^(?:س|سندوتش|ساندوتش)\s+(.*)$/i);
+    if (mSand) {
+      const qty = mSand[2] ? +mSand[1] : 1;
+      const name = cleanItemName(mSand[2] || mSand[1]);
+      return { shop: 'restaurant', kind: 'sand', qty, name: name || 'سندوتش' };
+    }
+
+    // ثانياً: علب صريحة بحرف ع أو كلمة علبة
+    let mBox = seg.match(/^(\d+)\s*(?:ع|علبه|علبة|علب)\s+(.*)$/i) ||
+               seg.match(/^(?:ع|علبه|علبة)\s+(.*)$/i);
+    if (mBox) {
+      const qty = mBox[2] ? +mBox[1] : 1;
+      const name = cleanItemName(mBox[2] || mBox[1]);
+      return { shop: 'restaurant', kind: 'box', qty, name: name || 'علبة' };
+    }
+
+    // ثالثاً: صريحة بحرف ج أو كلمة جنيه أو بـ
     let mMoney = seg.match(/^(?:ب\u0640*)?\s*(\d+(?:\.\d+)?)\s*(?:ج|جنيه|جنية|egp)\s+(.*)$/i) ||
                  seg.match(/^ب\u0640*(\d+(?:\.\d+)?)\s+(.*)$/i) ||
                  seg.match(/^(.*?)\s*(\d+(?:\.\d+)?)\s*(?:ج|جنيه|جنية|egp)$/i);
@@ -390,38 +409,17 @@ function parseRawItem(seg, isBreakfast){
       return { shop: 'restaurant', kind: 'money', amt, name: name || 'فول' };
     }
 
-    // علب (ع / علبة)
-    let mBox = seg.match(/^(\d+)\s*(?:ع|علبه|علبة|علب)\s+(.*)$/i) ||
-               seg.match(/^(?:ع|علبه|علبة)\s+(.*)$/i);
-    if (mBox) {
-      const qty = mBox[2] ? +mBox[1] : 1;
-      const name = cleanItemName(mBox[2] || mBox[1]);
-      return { shop: 'restaurant', kind: 'box', qty, name: name || 'علبة' };
-    }
-
-    // أكياس (ك / كيس)
-    let mBag = seg.match(/^(\d+)\s*(?:ك|كيس|اكياس|أكياس)\s+(.*)$/i) ||
-               seg.match(/^(?:ك|كيس)\s+(.*)$/i);
-    if (mBag) {
-      const qty = mBag[2] ? +mBag[1] : 1;
-      const name = cleanItemName(mBag[2] || mBag[1]);
-      return { shop: 'restaurant', kind: 'bag', qty, name: name || 'كيس' };
-    }
-
-    // سندوتشات صريحة (س)
-    let mSand = seg.match(/^(\d+)\s*(?:س|سندوتش|ساندوتش|سندوتشات)\s+(.*)$/i) ||
-                seg.match(/^(?:س|سندوتش|ساندوتش)\s+(.*)$/i);
-    if (mSand) {
-      const qty = mSand[2] ? +mSand[1] : 1;
-      const name = cleanItemName(mSand[2] || mSand[1]);
-      return { shop: 'restaurant', kind: 'sand', qty, name: name || 'سندوتش' };
+    // رابعاً (قاعدتك الذهبية): لو رقم سادة بدون حرف = يُحسب بالجنيه تلقائياً!
+    let mNum = seg.match(/^(\d+)\s*(?:x|×|-)?\s*(.*)$/i);
+    if (mNum && mNum[2].trim()){
+      return { shop: 'restaurant', kind: 'money', amt: +mNum[1], name: cleanItemName(mNum[2]) };
     }
   }
 
-  // في العشاء أو الأرقام العادية بالمطعم
-  let mNum = seg.match(/^(\d+)\s*(?:x|×|-)?\s*(.*)$/i);
-  if (mNum && mNum[2].trim()){
-    return { shop: 'restaurant', kind: 'sand', qty: +mNum[1], name: cleanItemName(mNum[2]) };
+  // في العشاء: الأرقام تكون وجبات/أصناف بالعدد
+  let mDinnerNum = seg.match(/^(\d+)\s*(?:x|×|-)?\s*(.*)$/i);
+  if (mDinnerNum && mDinnerNum[2].trim()){
+    return { shop: 'restaurant', kind: 'sand', qty: +mDinnerNum[1], name: cleanItemName(mDinnerNum[2]) };
   }
 
   return { shop: 'restaurant', kind: 'sand', qty: 1, name: clean };
@@ -430,16 +428,10 @@ function parseRawItem(seg, isBreakfast){
 function aggregate(items){
   const isBreakfast = (meal === 'breakfast');
   
-  // مطعم
   const restSand = new Map();
   const restMoney = new Map();
   const restBoxes = new Map();
-  const restBags = new Map();
-  
-  // سوبر ماركت
   const supermarket = new Map();
-  
-  // مخبز وفطاطري
   const bakery = new Map();
 
   items.forEach(it => {
@@ -458,7 +450,6 @@ function aggregate(items){
         e.qty += p.qty;
         bakery.set(k, e);
       } else {
-        // المطعم
         if (p.kind === 'money'){
           const e = restMoney.get(k) || {name: p.name, amt: 0};
           e.amt += p.amt;
@@ -467,10 +458,6 @@ function aggregate(items){
           const e = restBoxes.get(k) || {name: p.name, qty: 0};
           e.qty += p.qty;
           restBoxes.set(k, e);
-        } else if (p.kind === 'bag'){
-          const e = restBags.get(k) || {name: p.name, qty: 0};
-          e.qty += p.qty;
-          restBags.set(k, e);
         } else {
           const e = restSand.get(k) || {name: p.name, qty: 0};
           e.qty += p.qty;
@@ -484,7 +471,6 @@ function aggregate(items){
     restSand: [...restSand.values()].sort((a,b) => b.qty - a.qty),
     restMoney: [...restMoney.values()].sort((a,b) => b.amt - a.amt),
     restBoxes: [...restBoxes.values()].sort((a,b) => b.qty - a.qty),
-    restBags: [...restBags.values()].sort((a,b) => b.qty - a.qty),
     supermarket: [...supermarket.values()].sort((a,b) => b.qty - a.qty),
     bakery: [...bakery.values()].sort((a,b) => b.qty - a.qty)
   };
@@ -497,20 +483,16 @@ function buildSummary(){
   const d = new Date().toLocaleDateString('ar-EG', {weekday:'long', day:'numeric', month:'long'});
   let t = MEALS[meal].icon + ' فرز أوردر ' + MEALS[meal].label + ' - ' + d + '\n';
   
-  // 1. المطعم
   const restTitle = meal === 'dinner' ? '🍽️ طلبات المطعم (الوجبات):' : '🍽️ طلبات مطعم الفول والطعام:';
   t += '\n' + restTitle + '\n';
-  if (a.restSand.length) t += a.restSand.map(s => '• ' + s.qty + ' ' + s.name).join('\n') + '\n';
-  if (a.restMoney.length) t += a.restMoney.map(b => '• ' + b.name + ': إجمالي ' + fmt(b.amt) + ' جنيه').join('\n') + '\n';
+  if (a.restSand.length) t += a.restSand.map(s => '• ' + s.qty + ' سندوتش ' + s.name).join('\n') + '\n';
   if (a.restBoxes.length) t += a.restBoxes.map(b => '• ' + b.qty + ' علبة ' + b.name).join('\n') + '\n';
-  if (a.restBags.length) t += a.restBags.map(b => '• ' + b.qty + ' كيس ' + b.name).join('\n') + '\n';
+  if (a.restMoney.length) t += a.restMoney.map(b => '• ' + b.name + ': إجمالي ' + fmt(b.amt) + ' جنيه').join('\n') + '\n';
 
-  // 2. السوبر ماركت
   if (a.supermarket.length){
     t += '\n🏪 طلبات السوبر ماركت:\n' + a.supermarket.map(s => '• ' + s.qty + ' ' + s.name).join('\n') + '\n';
   }
 
-  // 3. المخبز والفطاطري
   if (a.bakery.length){
     t += '\n🥐 المخبز والفطاطري:\n' + a.bakery.map(b => '• ' + b.qty + ' ' + b.name).join('\n') + '\n';
   }
@@ -536,12 +518,12 @@ function checkDuplicates(items){
 
 function updateMealUI(){
   const isBreakfast = (meal === 'breakfast');
-  $('shortcutsHint').classList.toggle('hidden', !isBreakfast);
+  $('shortcutsBar').classList.toggle('hidden', !isBreakfast);
   
   if (isBreakfast){
-    $('fDetails').placeholder = 'اكتب براحتك: 5 فول 2 طعمية 1 مسقعة 1 شيبسي 1 كانز بيبسي 1 علبة جبنة 1 فطير مشلتت';
+    $('fDetails').placeholder = 'مثال: 2 س فول 1 ع مسقعة 15 بطاطس 1 شيبسي 1 كانز بيبسي';
   } else {
-    $('fDetails').placeholder = 'اكتب براحتك: 1 كشري لارج 1 ربع صدر 2 شاورما سوري 2 كانز بيبسي 1 شيبسي';
+    $('fDetails').placeholder = 'مثال: 1 كشري لارج 1 ربع صدر 2 شاورما سوري 2 كانز بيبسي';
   }
 }
 
@@ -562,7 +544,7 @@ function render(){
   if (tab === 'all') renderAllOrders();
 }
 
-/* ---------- حساب وعرض الملخص في 3 كروت منفصلة للمشاوير ---------- */
+/* ---------- حساب وعرض الملخص في الكروت المفروزة ---------- */
 function calculateAndDisplaySummary(){
   isSummaryCalculated = true;
   const p = $('summaryResultsContainer');
@@ -591,11 +573,10 @@ function calculateAndDisplaySummary(){
   // 1. كارت المطعم
   const restTitle = meal === 'dinner' ? '🍽️ طلبات المطعم الرئيسي (الوجبات)' : '🍽️ طلبات مطعم الفول والطعام';
   h += '<div class="card"><h2>' + restTitle + '</h2><ul class="agg">';
-  if (a.restSand.length) h += a.restSand.map(s => '<li><span>' + esc(s.name) + '</span><b>' + s.qty + '</b></li>').join('');
-  if (a.restMoney.length) h += a.restMoney.map(b => '<li><span>' + esc(b.name) + '</span><b>إجمالي ' + fmt(b.amt) + ' جنيه</b></li>').join('');
+  if (a.restSand.length) h += a.restSand.map(s => '<li><span>' + esc(s.name) + '</span><b>' + s.qty + ' سندوتش</b></li>').join('');
   if (a.restBoxes.length) h += a.restBoxes.map(b => '<li><span>' + esc(b.name) + '</span><b>' + b.qty + ' علبة</b></li>').join('');
-  if (a.restBags.length) h += a.restBags.map(b => '<li><span>' + esc(b.name) + '</span><b>' + b.qty + ' كيس</b></li>').join('');
-  if (!a.restSand.length && !a.restMoney.length && !a.restBoxes.length && !a.restBags.length) h += '<li class="muted">لا توجد طلبات مطعم</li>';
+  if (a.restMoney.length) h += a.restMoney.map(b => '<li><span>' + esc(b.name) + '</span><b>إجمالي ' + fmt(b.amt) + ' جنيه</b></li>').join('');
+  if (!a.restSand.length && !a.restBoxes.length && !a.restMoney.length) h += '<li class="muted">لا توجد طلبات مطعم</li>';
   h += '</ul></div>';
 
   // 2. كارت السوبر ماركت
@@ -621,7 +602,7 @@ function calculateAndDisplaySummary(){
 
 $('btnCalculateSummary').addEventListener('click', () => {
   calculateAndDisplaySummary();
-  toast('📊 تم فرز الطلبات على المحلات بنجاح!', 'info');
+  toast('📊 تم فرز وتجميع كل الطلبات بنجاح!', 'info');
 });
 
 /* ---------- وقت التوزيع ---------- */
@@ -863,14 +844,11 @@ $('sheetBtn').addEventListener('click', async () => {
   body.innerHTML = h;
 });
 
-// حذف السجل نهائياً من قاعدة البيانات والمتصفح
 $('deleteArchiveBtn').addEventListener('click', async () => {
   if (!confirm('⚠️ تحذير: هل أنت متأكد من مسح جميع الأوردرات السابقة والسجل نهائياً من قاعدة البيانات؟')) return;
   
   try{
     $('deleteArchiveBtn').disabled = true;
-    
-    // 1. مسح أرشيف الوجبة من Firestore
     const snap = await db.collection('work_orders_archive').where('meal', '==', meal).get();
     const batch = db.batch();
     snap.docs.forEach(doc => {
@@ -878,9 +856,7 @@ $('deleteArchiveBtn').addEventListener('click', async () => {
     });
     await batch.commit();
 
-    // 2. تفريغ السجل في واجهة المودال
     $('sheetBody').innerHTML = '<div class="empty" style="color:var(--success-color)">🗑️ تم حذف السجل بالكامل بنجاح.</div>';
-    
     toast('✅ تم حذف السجل نهائياً من قاعدة البيانات بنجاح!');
   }catch(e){
     console.error(e);
