@@ -21,35 +21,30 @@ body{font-family:'Cairo','Inter',sans-serif;background:var(--bg-color);color:var
   background-attachment:fixed;line-height:1.7;padding-bottom:env(safe-area-inset-bottom,0)}
 .wrap{max-width:720px;margin:0 auto;padding:16px 14px 40px}
 
-/* Header & Top Bar */
+/* Header */
 .main-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
 .main-header h1{font-size:1.3rem;font-weight:900;color:var(--primary-neon);text-shadow:0 0 14px rgba(0,242,254,.55);margin:0}
 h2{font-size:1.05rem;font-weight:700;margin-bottom:10px}
 .hidden{display:none!important}
 
-/* meal switch */
+/* Meals Switch */
 .meals{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--bg-secondary);padding:6px;border-radius:16px;border:1px solid rgba(79,172,254,.25);margin-bottom:16px}
 .meals button{font:inherit;font-weight:700;padding:11px 6px;border:0;border-radius:12px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:.25s}
 .meals button.on{background:linear-gradient(135deg,var(--primary-neon),var(--secondary-neon));color:#04121a;box-shadow:0 0 18px rgba(0,242,254,.5)}
 
-/* cards */
+/* Cards */
 .card{background:rgba(26,35,50,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(0,242,254,.28);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 0 0 1px rgba(127,0,255,.08),0 8px 28px rgba(0,0,0,.35);transition:.3s}
 .muted{color:var(--text-secondary);font-size:.9rem}
 .empty{text-align:center;color:var(--text-secondary);padding:26px 8px}
 
-/* form */
+/* Inputs */
 label{display:block;font-weight:600;margin:12px 0 6px;font-size:.95rem}
 input[type=text],textarea{width:100%;font:inherit;color:var(--text-color);background:var(--bg-secondary);border:1px solid rgba(79,172,254,.35);border-radius:12px;padding:11px 13px;outline:none;transition:.25s}
-textarea{min-height:80px;resize:vertical}
+textarea{min-height:90px;resize:vertical}
 input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px rgba(0,242,254,.4)}
 
-/* Segmented Control */
-.seg{display:grid;grid-template-columns:repeat(auto-fit, minmax(70px, 1fr));gap:6px}
-.seg button,.pill{font:inherit;font-weight:600;padding:10px 4px;border-radius:12px;border:1px solid rgba(79,172,254,.35);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;transition:.2s;font-size:.82rem;text-align:center}
-.seg button.on,.pill.on{border-color:var(--primary-neon);color:var(--primary-neon);background:rgba(0,242,254,.1);box-shadow:0 0 12px rgba(0,242,254,.35)}
-
-/* Quick Shortcut Bar */
-.shortcuts-hint{background:rgba(0,242,254,.07);border:1px dashed rgba(0,242,254,.3);border-radius:10px;padding:8px 10px;margin-bottom:12px;font-size:.8rem;color:var(--secondary-neon);display:flex;justify-content:space-around;flex-wrap:wrap;gap:4px}
+/* Shortcut Hint */
+.shortcuts-hint{background:rgba(0,242,254,.07);border:1px dashed rgba(0,242,254,.3);border-radius:10px;padding:8px 10px;margin:8px 0 12px;font-size:.8rem;color:var(--secondary-neon);display:flex;justify-content:space-around;flex-wrap:wrap;gap:4px}
 .shortcuts-hint span{font-weight:700}
 
 /* Buttons */
@@ -59,15 +54,14 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
 .btn:disabled{opacity:.5;pointer-events:none}
 .btn.ghost{background:transparent;color:var(--text-color);border:1px solid rgba(79,172,254,.45)}
 .btn.danger{background:transparent;color:var(--danger-color);border:1px solid var(--danger-color)}
-.btn.purple{background:linear-gradient(135deg,var(--accent-purple),var(--secondary-neon));color:#fff}
+.btn.danger-filled{background:var(--danger-color);color:#fff}
+.btn.danger-filled:hover{box-shadow:0 0 16px rgba(255,71,87,.6)}
 .btn.ok{background:linear-gradient(135deg,var(--success-color),#26d0a0);color:#04121a}
 .btn.warn{background:linear-gradient(135deg,var(--warning-color),#ffc048);color:#04121a}
 
-/* Top Reset Button */
 .btn-top-reset{background:rgba(255,71,87,.15);border:1px solid var(--danger-color);color:var(--danger-color);padding:8px 12px;font-size:.85rem;border-radius:10px}
 .btn-top-reset:hover{background:var(--danger-color);color:#fff;box-shadow:0 0 12px rgba(255,71,87,.5)}
 
-/* Action Icons */
 .card-actions{display:flex;align-items:center;gap:4px}
 .btn-icon{background:transparent;border:none;font-size:1.05rem;cursor:pointer;padding:4px 6px;border-radius:8px;transition:.2s}
 .btn-icon:hover{background:rgba(255,255,255,.1)}
@@ -81,40 +75,40 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
 .badge.wait{color:var(--warning-color);border-color:var(--warning-color);background:rgba(255,165,2,.2);font-size:.8rem}
 .top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
 
-/* tabs */
+/* Tabs */
 .tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:16px 0 14px}
 .tabs button{font:inherit;font-weight:700;padding:11px 4px;border-radius:12px;border:1px solid rgba(127,0,255,.5);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;transition:.2s;font-size:.85rem}
 .tabs button.on{background:linear-gradient(135deg,var(--accent-purple),var(--secondary-neon));color:#fff;box-shadow:0 0 16px rgba(127,0,255,.5)}
 
-/* aggregation */
+/* Lists */
 .agg{list-style:none}
 .agg li{display:flex;justify-content:space-between;gap:10px;padding:9px 4px;border-bottom:1px dashed rgba(176,184,198,.2)}
 .agg li:last-child{border:0}
 .agg b{color:var(--primary-neon);white-space:nowrap}
 .total{margin-top:8px;text-align:left;font-weight:900;color:var(--warning-color)}
 
-/* Duplicates Alert */
 .alert-dup{background:rgba(255,71,87,.15);border:1px solid var(--danger-color);border-radius:12px;padding:12px;margin-bottom:14px;color:#ffd5d9;font-size:.9rem}
 .alert-dup b{color:var(--danger-color)}
 
-/* worker cards */
+/* Worker Cards */
 .wcard{transition:opacity .15s ease, transform .15s ease}
 .wcard.fade{opacity:0;transform:scale(0.92);pointer-events:none}
 .wcard .name{font-weight:900;font-size:1.1rem;display:flex;justify-content:space-between;align-items:center}
 .wcard .items{background:var(--bg-secondary);border-radius:10px;padding:9px 12px;margin:8px 0;white-space:pre-wrap;word-break:break-word}
-.tag{font-size:.78rem;padding:2px 10px;border-radius:99px;background:rgba(127,0,255,.25);color:#d6b8ff}
 .pays{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.pill{font:inherit;font-weight:600;padding:8px 4px;border-radius:10px;border:1px solid rgba(79,172,254,.35);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;transition:.2s;font-size:.85rem}
+.pill.on{border-color:var(--primary-neon);color:var(--primary-neon);background:rgba(0,242,254,.1)}
 .counter{text-align:center;font-weight:700;color:var(--warning-color);margin-bottom:12px}
 .party{text-align:center;border-color:var(--success-color);box-shadow:0 0 28px rgba(46,213,115,.4);font-size:1.15rem;font-weight:900;padding:28px 14px}
 
-/* modal */
+/* Modal */
 .modal{position:fixed;inset:0;background:rgba(5,8,14,.78);backdrop-filter:blur(5px);display:flex;align-items:flex-end;justify-content:center;z-index:50;padding:0}
 .modal .box{background:var(--card-bg);border:1px solid var(--primary-neon);border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:88vh;overflow:auto;padding:18px;box-shadow:0 0 28px rgba(0,242,254,.35)}
 @media(min-width:600px){.modal{align-items:center}.modal .box{border-radius:20px}}
 .sheet-row{padding:9px 0;border-bottom:1px dashed rgba(176,184,198,.2)}
 .sheet-row .ok-t{color:var(--success-color)}.sheet-row .wait-t{color:var(--warning-color)}
 
-/* toast */
+/* Toast */
 #toasts{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;width:min(92vw,420px);pointer-events:none}
 .toast{background:var(--card-bg);border:1px solid var(--success-color);border-radius:14px;padding:11px 14px;font-weight:700;text-align:center;box-shadow:0 0 18px rgba(46,213,115,.4);animation:tin .3s;transition:.4s}
 .toast.error{border-color:var(--danger-color);box-shadow:0 0 18px rgba(255,71,87,.4)}
@@ -132,11 +126,13 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
     <button class="btn btn-top-reset" id="resetBtnTop" type="button">🗑️ بدء أوردر جديد</button>
   </header>
 
+  <!-- تبديل الوجبة -->
   <div class="meals" role="tablist">
     <button id="mb-breakfast" data-meal="breakfast">🥪 أوردر الفطار</button>
     <button id="mb-dinner" data-meal="dinner">🍔 أوردر العشاء / الغداء</button>
   </div>
 
+  <!-- كارت تسجيل الطلب النظيف (مربع واحد شامل) -->
   <div class="card" id="formCard">
     <div class="top">
       <h2 id="formTitle">➕ تسجيل طلب موظف</h2>
@@ -146,64 +142,47 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
     <label for="fName">اسم الموظف</label>
     <input type="text" id="fName" placeholder="مثال: أحمد فتحي" maxlength="60">
 
-    <div id="typeSegContainer">
-      <label>نوع الطلب</label>
-      <div class="seg" id="typeSeg">
-        <button type="button" data-type="sandwich" class="on" id="btnTypeSand">🥪 سندوتشات</button>
-        <button type="button" data-type="bulk" id="btnTypeBulk">🥡 علب وأكياس</button>
-        <button type="button" data-type="mixed" id="btnTypeMixed">🔀 مكس</button>
-        <button type="button" data-type="other" id="btnTypeOther">🥧 طلبات أخرى</button>
-      </div>
-    </div>
-
-    <!-- شريط تلميح الاختصارات السريعة -->
-    <div class="shortcuts-hint">
+    <!-- شريط تلميح الحروف (في الفطار فقط) -->
+    <div class="shortcuts-hint" id="shortcutsHint">
       <span>⚡ س = سندوتش (5 س فول)</span>
-      <span>🥡 ع = علبة (2 ع فول)</span>
-      <span>🛍️ ك = كيس (1 ك فول)</span>
-      <span>💵 ج = جنيه (15 ج فول)</span>
+      <span>🥡 ع = علبة (2 ع مسقعة)</span>
+      <span>🛍️ ك = كيس (1 ك طعمية)</span>
+      <span>💵 ج = جنيه (15 ج بطاطس)</span>
     </div>
 
-    <div id="boxSand">
-      <label for="fSand" id="lblSand">السندوتشات أو الوجبات</label>
-      <textarea id="fSand" placeholder="مثال: 5 س فول 2 طعمية، أو 1 كشري لارج"></textarea>
-    </div>
-
-    <div id="boxBulk" class="hidden">
-      <label for="fBulk">العلب والأكياس</label>
-      <textarea id="fBulk" placeholder="مثال: 15 ج فول، 2 ع طعمية، 1 ك بتنجان، 5 عيش"></textarea>
-    </div>
-
-    <div id="boxOther" class="hidden">
-      <label for="fOther">طلبات أخرى (فطير، أجبان، مشروبات، متفرقات)</label>
-      <textarea id="fOther" placeholder="مثال: 1 فطير مشلتت، 1 علبة جبنة، 2 بيبسي"></textarea>
-    </div>
+    <label for="fDetails" id="lblDetails">تفاصيل الطلب بالكامل</label>
+    <textarea id="fDetails" placeholder="اكتب براحتك في مربع واحد: 5 فول 2 طعمية 1 شيبسي 1 كانز بيبسي 1 علبة جبنة"></textarea>
 
     <div class="row" style="margin-top:14px">
       <button class="btn ok" id="savePersonBtn" type="button" style="width:100%; padding:13px;">💾 حفظ الطلب</button>
     </div>
   </div>
 
+  <!-- التبويبات -->
   <div class="tabs">
     <button id="tb-cashier" data-tab="cashier" class="on">جمع الطلبات 📊</button>
     <button id="tb-deliver" data-tab="deliver">وقت التوزيع 📦</button>
     <button id="tb-all" data-tab="all">كل الأوردرات 📋</button>
   </div>
 
+  <!-- 1. جمع الطلبات (المفروز تلقائياً) -->
   <div id="paneCashier">
     <div style="text-align:center; margin-bottom:14px;">
       <button class="btn warn" id="btnCalculateSummary" type="button" style="width:100%; padding:14px; font-size:1.05rem;">
-        ⚡ اضغط لتجميع وحساب كل الطلبات الآن
+        ⚡ اضغط لتجميع وفرز كل الطلبات الآن
       </button>
     </div>
 
     <div id="dupAlertContainer"></div>
     <div id="summaryResultsContainer">
-      <div class="card empty">اضغط على الزرار بالأعلى لتجميع وحساب إجمالي الأصناف والفلوس.</div>
+      <div class="card empty">اضغط على الزرار بالأعلى لفرز طلبات المطعم، والسوبر ماركت، والمخبز تلقائياً.</div>
     </div>
   </div>
 
+  <!-- 2. وقت التوزيع -->
   <div id="paneDeliver" class="hidden"></div>
+
+  <!-- 3. كل الأوردرات -->
   <div id="paneAll" class="hidden"></div>
 
   <div class="row" style="margin-top:14px">
@@ -211,10 +190,19 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
   </div>
 </div>
 
+<!-- Modal الأرشيف مع زر الحذف النهائي -->
 <div class="modal hidden" id="mSheet"><div class="box">
-  <h2>📜 ورقة الأوردر</h2>
+  <div class="top">
+    <h2>📜 ورقة الأوردر والسجل</h2>
+    <button class="btn btn-icon del" data-close style="font-size:1.2rem;">✖</button>
+  </div>
+  
   <div id="sheetBody"></div>
-  <div class="row" style="margin-top:14px"><button class="btn ghost" data-close type="button">إغلاق</button></div>
+
+  <div class="row" style="margin-top:16px">
+    <button class="btn danger-filled" id="deleteArchiveBtn" type="button" style="flex:2">🗑️ حذف السجل نهائياً</button>
+    <button class="btn ghost" data-close type="button" style="flex:1">إغلاق</button>
+  </div>
 </div></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -242,7 +230,6 @@ const MEALS = {
 let meal = 'breakfast', unsub = null, tab = 'cashier';
 let state = {items:[]};
 const payChoice = {}; 
-let empType = 'sandwich';
 let editingId = null;
 let isSummaryCalculated = false;
 
@@ -302,7 +289,7 @@ function listen(){
           if (isSummaryCalculated) calculateAndDisplaySummary();
         }
       },
-      err => { console.warn('Firebase notice:', err); }
+      err => { console.warn('Firebase sync notice:', err); }
     );
   } catch(e) {}
 }
@@ -325,7 +312,23 @@ async function mutate(fn){
   }
 }
 
-/* ---------- نظام التعرف على الحروف الذكية (س - ع - ك - ج) والتجميع الدقيق ---------- */
+/* ---------- القاموس المصري الشامل لتصنيف المحلات (أكثر من 100 كلمة) ---------- */
+const SUPERMARKET_DICT = [
+  'شيبسي', 'تايجر', 'شيتوس', 'دوريتوس', 'كاراتيه', 'بيبيتو', 'شيبس',
+  'بيبسي', 'كولا', 'كوكاكولا', 'سفن', 'سبرايت', 'شويبس', 'ميرندا', 'فانتا', 'سبيروسباتس', 'كانز', 'صودا',
+  'عصير', 'جهينه', 'بيتي', 'لبن', 'حليب', 'زبادي', 'رايب',
+  'جبنه', 'جبنة', 'رومي', 'فيتا', 'اسطنبولي', 'شيدر', 'موزاريلا', 'براميلي', 'قريش', 'كيري', 'طعمة',
+  'تونة', 'تونه', 'سردين', 'بلوبيف',
+  'نسكافيه', 'كوفي ميكس', 'شاي', 'قهوة', 'سكر', 'مياه', 'ميه', 'معدنيه', 'معدنية',
+  'امير', 'انبوبة امير', 'سوبر جلو', 'مناديل', 'ولاعه', 'كبريت',
+  'بسكوت', 'شيكولاته', 'شوكولاته', 'ويفر', 'بان كيك', 'مولتو', 'هوهوز', 'توينكيز', 'علكه', 'لبان', 'كلوريتس', 'تريتس', 'شيكولاته'
+];
+
+const BAKERY_DICT = [
+  'فطير', 'فطيرة', 'فطيره', 'مشلتت', 'قشطة', 'قشطه', 'عسل', 'مش', 'جبنة قديمة', 'جبنه قديمه',
+  'باتيه', 'كرواسون', 'بوريك', 'قرص', 'قرصة', 'سميط', 'عيش سن', 'فينو', 'عيش فينو', 'كيك', 'كب كيك', 'باتون ساليه', 'سابليه'
+];
+
 const AR_DIGITS = '٠١٢٣٤٥٦٧٨٩';
 const toEn = s => String(s).replace(/[٠-٩]/g, d => AR_DIGITS.indexOf(d)).replace(/٫/g,'.');
 
@@ -349,115 +352,141 @@ function smartSplit(t){
     .filter(Boolean);
 }
 
-// دالة فك وتصنيف أي صنف مكتوب بأي شكل أو اختصار
-function parseSmartItem(seg){
+// دالة تصنيف الصنف وتطبيق نظام الحروف (في الفطار فقط)
+function parseRawItem(seg, isBreakfast){
   seg = toEn(seg).trim();
   if (!seg) return null;
 
-  // 1. فلوس بـ ج أو جنيه أو بـ
-  // 15 ج فول | 15ج فول | بـ 15 فول | بـ15 فول | 15 جنيه فول
-  let mMoney = seg.match(/^(?:ب\u0640*)?\s*(\d+(?:\.\d+)?)\s*(?:ج|جنيه|جنية|egp)\s+(.*)$/i) ||
-               seg.match(/^ب\u0640*(\d+(?:\.\d+)?)\s+(.*)$/i) ||
-               seg.match(/^(.*?)\s*(\d+(?:\.\d+)?)\s*(?:ج|جنيه|جنية|egp)$/i);
-  if (mMoney) {
-    const amt = +mMoney[1] || +mMoney[2];
-    const name = cleanItemName(mMoney[1] ? mMoney[2] : mMoney[1]);
-    return { kind: 'money', amt, name: name || 'فول' };
+  let clean = cleanItemName(seg);
+
+  // 1. هل الصنف يتبع المخبز والفطاطري؟
+  const isBakery = BAKERY_DICT.some(w => clean.includes(w));
+  if (isBakery){
+    let m = seg.match(/^(\d+)\s*(?:x|×|-)?\s*(.*)$/i);
+    let qty = m ? +m[1] : 1;
+    let name = m && m[2].trim() ? cleanItemName(m[2]) : clean;
+    return { shop: 'bakery', qty, name };
   }
 
-  // 2. علب بـ ع أو علبة
-  // 2 ع فول | 2ع فول | 2 علبة فول | علبة فول
-  let mBox = seg.match(/^(\d+)\s*(?:ع|علبه|علبة|علب)\s+(.*)$/i) ||
-             seg.match(/^(?:ع|علبه|علبة)\s+(.*)$/i);
-  if (mBox) {
-    const qty = mBox[2] ? +mBox[1] : 1;
-    const name = cleanItemName(mBox[2] || mBox[1]);
-    return { kind: 'box', qty, name: name || 'علبة' };
+  // 2. هل الصنف يتبع السوبر ماركت؟
+  const isSupermarket = SUPERMARKET_DICT.some(w => clean.includes(w));
+  if (isSupermarket){
+    let m = seg.match(/^(\d+)\s*(?:x|×|-)?\s*(.*)$/i);
+    let qty = m ? +m[1] : 1;
+    let name = m && m[2].trim() ? cleanItemName(m[2]) : clean;
+    return { shop: 'supermarket', qty, name };
   }
 
-  // 3. أكياس بـ ك أو كيس
-  // 2 ك فول | 2ك فول | 2 كيس فول | كيس فول
-  let mBag = seg.match(/^(\d+)\s*(?:ك|كيس|اكياس|أكياس)\s+(.*)$/i) ||
-             seg.match(/^(?:ك|كيس)\s+(.*)$/i);
-  if (mBag) {
-    const qty = mBag[2] ? +mBag[1] : 1;
-    const name = cleanItemName(mBag[2] || mBag[1]);
-    return { kind: 'bag', qty, name: name || 'كيس' };
+  // 3. يتبع مطعم الأكل / الفول والطعام:
+  // نظام الحروف (س، ع، ك، ج) يطبق في الفطار فقط
+  if (isBreakfast){
+    // فلوس (ج / جنيه / بـ)
+    let mMoney = seg.match(/^(?:ب\u0640*)?\s*(\d+(?:\.\d+)?)\s*(?:ج|جنيه|جنية|egp)\s+(.*)$/i) ||
+                 seg.match(/^ب\u0640*(\d+(?:\.\d+)?)\s+(.*)$/i) ||
+                 seg.match(/^(.*?)\s*(\d+(?:\.\d+)?)\s*(?:ج|جنيه|جنية|egp)$/i);
+    if (mMoney) {
+      const amt = +mMoney[1] || +mMoney[2];
+      const name = cleanItemName(mMoney[1] ? mMoney[2] : mMoney[1]);
+      return { shop: 'restaurant', kind: 'money', amt, name: name || 'فول' };
+    }
+
+    // علب (ع / علبة)
+    let mBox = seg.match(/^(\d+)\s*(?:ع|علبه|علبة|علب)\s+(.*)$/i) ||
+               seg.match(/^(?:ع|علبه|علبة)\s+(.*)$/i);
+    if (mBox) {
+      const qty = mBox[2] ? +mBox[1] : 1;
+      const name = cleanItemName(mBox[2] || mBox[1]);
+      return { shop: 'restaurant', kind: 'box', qty, name: name || 'علبة' };
+    }
+
+    // أكياس (ك / كيس)
+    let mBag = seg.match(/^(\d+)\s*(?:ك|كيس|اكياس|أكياس)\s+(.*)$/i) ||
+               seg.match(/^(?:ك|كيس)\s+(.*)$/i);
+    if (mBag) {
+      const qty = mBag[2] ? +mBag[1] : 1;
+      const name = cleanItemName(mBag[2] || mBag[1]);
+      return { shop: 'restaurant', kind: 'bag', qty, name: name || 'كيس' };
+    }
+
+    // سندوتشات صريحة (س)
+    let mSand = seg.match(/^(\d+)\s*(?:س|سندوتش|ساندوتش|سندوتشات)\s+(.*)$/i) ||
+                seg.match(/^(?:س|سندوتش|ساندوتش)\s+(.*)$/i);
+    if (mSand) {
+      const qty = mSand[2] ? +mSand[1] : 1;
+      const name = cleanItemName(mSand[2] || mSand[1]);
+      return { shop: 'restaurant', kind: 'sand', qty, name: name || 'سندوتش' };
+    }
   }
 
-  // 4. سندوتشات صريحة بـ س أو سندوتش
-  // 5 س فول | 5س فول | 5 سندوتش فول
-  let mSand = seg.match(/^(\d+)\s*(?:س|سندوتش|ساندوتش|سندوتشات)\s+(.*)$/i) ||
-              seg.match(/^(?:س|سندوتش|ساندوتش)\s+(.*)$/i);
-  if (mSand) {
-    const qty = mSand[2] ? +mSand[1] : 1;
-    const name = cleanItemName(mSand[2] || mSand[1]);
-    return { kind: 'sand', qty, name: name || 'سندوتش' };
-  }
-
-  // 5. رقم مجرد مباشر (5 فول = 5 سندوتشات افتراضياً)
+  // في العشاء أو الأرقام العادية بالمطعم
   let mNum = seg.match(/^(\d+)\s*(?:x|×|-)?\s*(.*)$/i);
-  if (mNum && mNum[2].trim()) {
-    return { kind: 'sand', qty: +mNum[1], name: cleanItemName(mNum[2]) };
+  if (mNum && mNum[2].trim()){
+    return { shop: 'restaurant', kind: 'sand', qty: +mNum[1], name: cleanItemName(mNum[2]) };
   }
 
-  // 6. كلمة بدون أرقام (فول = 1 سندوتش)
-  return { kind: 'sand', qty: 1, name: cleanItemName(seg) };
+  return { shop: 'restaurant', kind: 'sand', qty: 1, name: clean };
 }
 
 function aggregate(items){
-  const sand = new Map();     // سندوتشات ووجبات
-  const money = new Map();    // بالجنيه
-  const boxes = new Map();    // علب بالعدد
-  const bags = new Map();     // أكياس بالعدد
-  const other = new Map();    // متفرقات وطلبات أخرى
+  const isBreakfast = (meal === 'breakfast');
+  
+  // مطعم
+  const restSand = new Map();
+  const restMoney = new Map();
+  const restBoxes = new Map();
+  const restBags = new Map();
+  
+  // سوبر ماركت
+  const supermarket = new Map();
+  
+  // مخبز وفطاطري
+  const bakery = new Map();
 
-  function processText(text, defaultCategory){
-    smartSplit(text).forEach(seg => {
-      const parsed = parseSmartItem(seg);
-      if (!parsed) return;
+  items.forEach(it => {
+    smartSplit(it.details || '').forEach(seg => {
+      const p = parseRawItem(seg, isBreakfast);
+      if (!p) return;
 
-      const k = keyOf(parsed.name);
+      const k = keyOf(p.name);
 
-      if (parsed.kind === 'money'){
-        const e = money.get(k) || {name: parsed.name, amt: 0};
-        e.amt += parsed.amt;
-        money.set(k, e);
-      } else if (parsed.kind === 'box'){
-        const e = boxes.get(k) || {name: parsed.name, qty: 0};
-        e.qty += parsed.qty;
-        boxes.set(k, e);
-      } else if (parsed.kind === 'bag'){
-        const e = bags.get(k) || {name: parsed.name, qty: 0};
-        e.qty += parsed.qty;
-        bags.set(k, e);
+      if (p.shop === 'supermarket'){
+        const e = supermarket.get(k) || {name: p.name, qty: 0};
+        e.qty += p.qty;
+        supermarket.set(k, e);
+      } else if (p.shop === 'bakery'){
+        const e = bakery.get(k) || {name: p.name, qty: 0};
+        e.qty += p.qty;
+        bakery.set(k, e);
       } else {
-        // sand أو غير محدد
-        if (defaultCategory === 'other'){
-          const e = other.get(k) || {name: parsed.name, qty: 0};
-          e.qty += parsed.qty;
-          other.set(k, e);
+        // المطعم
+        if (p.kind === 'money'){
+          const e = restMoney.get(k) || {name: p.name, amt: 0};
+          e.amt += p.amt;
+          restMoney.set(k, e);
+        } else if (p.kind === 'box'){
+          const e = restBoxes.get(k) || {name: p.name, qty: 0};
+          e.qty += p.qty;
+          restBoxes.set(k, e);
+        } else if (p.kind === 'bag'){
+          const e = restBags.get(k) || {name: p.name, qty: 0};
+          e.qty += p.qty;
+          restBags.set(k, e);
         } else {
-          const e = sand.get(k) || {name: parsed.name, qty: 0};
-          e.qty += parsed.qty;
-          sand.set(k, e);
+          const e = restSand.get(k) || {name: p.name, qty: 0};
+          e.qty += p.qty;
+          restSand.set(k, e);
         }
       }
     });
-  }
-
-  items.forEach(it => {
-    if (it.sandText) processText(it.sandText, 'sand');
-    if (it.bulkText) processText(it.bulkText, 'bulk');
-    if (it.otherText) processText(it.otherText, 'other');
   });
 
   return {
-    sand: [...sand.values()].sort((a,b) => b.qty - a.qty),
-    money: [...money.values()].sort((a,b) => b.amt - a.amt),
-    boxes: [...boxes.values()].sort((a,b) => b.qty - a.qty),
-    bags: [...bags.values()].sort((a,b) => b.qty - a.qty),
-    other: [...other.values()].sort((a,b) => b.qty - a.qty)
+    restSand: [...restSand.values()].sort((a,b) => b.qty - a.qty),
+    restMoney: [...restMoney.values()].sort((a,b) => b.amt - a.amt),
+    restBoxes: [...restBoxes.values()].sort((a,b) => b.qty - a.qty),
+    restBags: [...restBags.values()].sort((a,b) => b.qty - a.qty),
+    supermarket: [...supermarket.values()].sort((a,b) => b.qty - a.qty),
+    bakery: [...bakery.values()].sort((a,b) => b.qty - a.qty)
   };
 }
 
@@ -466,40 +495,37 @@ const fmt = n => (Math.round(n * 100) / 100).toLocaleString('en-US');
 function buildSummary(){
   const a = aggregate(state.items);
   const d = new Date().toLocaleDateString('ar-EG', {weekday:'long', day:'numeric', month:'long'});
-  let t = MEALS[meal].icon + ' طلب ' + MEALS[meal].label + ' - ' + d + '\n';
+  let t = MEALS[meal].icon + ' فرز أوردر ' + MEALS[meal].label + ' - ' + d + '\n';
   
-  const titleCategory = meal === 'dinner' ? 'الوجبات والأصناف:' : 'السندوتشات والوجبات:';
-  const unitLabel = meal === 'dinner' ? ' صنف / وجبة' : ' سندوتش';
+  // 1. المطعم
+  const restTitle = meal === 'dinner' ? '🍽️ طلبات المطعم (الوجبات):' : '🍽️ طلبات مطعم الفول والطعام:';
+  t += '\n' + restTitle + '\n';
+  if (a.restSand.length) t += a.restSand.map(s => '• ' + s.qty + ' ' + s.name).join('\n') + '\n';
+  if (a.restMoney.length) t += a.restMoney.map(b => '• ' + b.name + ': إجمالي ' + fmt(b.amt) + ' جنيه').join('\n') + '\n';
+  if (a.restBoxes.length) t += a.restBoxes.map(b => '• ' + b.qty + ' علبة ' + b.name).join('\n') + '\n';
+  if (a.restBags.length) t += a.restBags.map(b => '• ' + b.qty + ' كيس ' + b.name).join('\n') + '\n';
 
-  if (a.sand.length){
-    t += '\n' + (meal === 'dinner' ? '🍔 ' : '🥪 ') + titleCategory + '\n' + a.sand.map(s => '• ' + s.qty + ' ' + s.name).join('\n') + '\n';
-    t += 'الإجمالي: ' + a.sand.reduce((x,s) => x + s.qty, 0) + unitLabel + '\n';
+  // 2. السوبر ماركت
+  if (a.supermarket.length){
+    t += '\n🏪 طلبات السوبر ماركت:\n' + a.supermarket.map(s => '• ' + s.qty + ' ' + s.name).join('\n') + '\n';
   }
-  if (a.money.length || a.boxes.length || a.bags.length){
-    t += '\n🥡 العلب والأكياس:\n';
-    if (a.money.length) t += a.money.map(b => '• ' + b.name + ': إجمالي ' + fmt(b.amt) + ' جنيه').join('\n') + '\n';
-    if (a.boxes.length) t += a.boxes.map(b => '• ' + b.qty + ' علبة ' + b.name).join('\n') + '\n';
-    if (a.bags.length) t += a.bags.map(b => '• ' + b.qty + ' كيس ' + b.name).join('\n') + '\n';
+
+  // 3. المخبز والفطاطري
+  if (a.bakery.length){
+    t += '\n🥐 المخبز والفطاطري:\n' + a.bakery.map(b => '• ' + b.qty + ' ' + b.name).join('\n') + '\n';
   }
-  if (a.other.length){
-    t += '\n🥧 طلبات أخرى ومتفرقات:\n' + a.other.map(o => '• ' + o.qty + ' ' + o.name).join('\n') + '\n';
-    t += 'الإجمالي: ' + a.other.reduce((x,o) => x + o.qty, 0) + ' صنف\n';
-  }
+
   return t.trim();
 }
 
-/* ---------- كاشف الأوردرات المكررة ---------- */
 function checkDuplicates(items){
   const map = new Map();
   const duplicates = [];
 
   items.forEach(it => {
-    const orderFingerprint = keyOf(it.name) + '___' + cleanItemName((it.sandText || '') + (it.bulkText || '') + (it.otherText || ''));
+    const orderFingerprint = keyOf(it.name) + '___' + cleanItemName(it.details || '');
     if (map.has(orderFingerprint)){
-      duplicates.push({
-        name: it.name,
-        details: (it.sandText ? it.sandText + ' ' : '') + (it.bulkText ? it.bulkText + ' ' : '') + (it.otherText || '')
-      });
+      duplicates.push({ name: it.name, details: it.details });
     } else {
       map.set(orderFingerprint, true);
     }
@@ -508,26 +534,17 @@ function checkDuplicates(items){
   return duplicates;
 }
 
-/* ---------- التبديل الديناميكي بين الفطار والعشاء ---------- */
 function updateMealUI(){
-  const isDinner = (meal === 'dinner');
-  if (isDinner){
-    $('btnTypeSand').textContent = '🍔 وجبات رئيسية';
-    $('btnTypeBulk').classList.add('hidden');
-    $('btnTypeMixed').classList.add('hidden');
-    $('lblSand').textContent = 'تفاصيل الوجبات والطلبات';
-    $('fSand').placeholder = 'مثال: 1 كشري لارج، 1 ربع صدر، 2 شاورما سوري، حواوشي';
+  const isBreakfast = (meal === 'breakfast');
+  $('shortcutsHint').classList.toggle('hidden', !isBreakfast);
+  
+  if (isBreakfast){
+    $('fDetails').placeholder = 'اكتب براحتك: 5 فول 2 طعمية 1 مسقعة 1 شيبسي 1 كانز بيبسي 1 علبة جبنة 1 فطير مشلتت';
   } else {
-    $('btnTypeSand').textContent = '🥪 سندوتشات';
-    $('btnTypeBulk').classList.remove('hidden');
-    $('btnTypeMixed').classList.remove('hidden');
-    $('lblSand').textContent = 'السندوتشات أو الوجبات';
-    $('fSand').placeholder = 'مثال: 5 س فول 2 طعمية، أو 1 كشري لارج';
+    $('fDetails').placeholder = 'اكتب براحتك: 1 كشري لارج 1 ربع صدر 2 شاورما سوري 2 كانز بيبسي 1 شيبسي';
   }
-  setOrderTypeUI(empType);
 }
 
-/* ---------- العرض والواجهة ---------- */
 function render(){
   document.querySelectorAll('.meals button').forEach(b => b.classList.toggle('on', b.dataset.meal === meal));
   const n = state.items.length;
@@ -545,7 +562,7 @@ function render(){
   if (tab === 'all') renderAllOrders();
 }
 
-/* ---------- حساب وعرض الملخص عند الضغط فقط ---------- */
+/* ---------- حساب وعرض الملخص في 3 كروت منفصلة للمشاوير ---------- */
 function calculateAndDisplaySummary(){
   isSummaryCalculated = true;
   const p = $('summaryResultsContainer');
@@ -557,53 +574,54 @@ function calculateAndDisplaySummary(){
     return;
   }
 
-  // 1. فحص التكرار
+  // فحص التكرار
   const dups = checkDuplicates(state.items);
   if (dups.length > 0){
     dupContainer.innerHTML = '<div class="alert-dup">' +
-      '⚠️ <b>تنبيه بخصوص أوردرات مكررة:</b> تم تسجيل الموظف التالي أكثر من مرة بنفس الطلب بالتفصيل:<br>' +
+      '⚠️ <b>تنبيه بخصوص أوردرات مكررة:</b> تم تسجيل نفس الموظف والطلب مرتين:<br>' +
       dups.map(d => '• <b>' + esc(d.name) + ':</b> ' + esc(d.details)).join('<br>') +
       '</div>';
   } else {
     dupContainer.innerHTML = '';
   }
 
-  // 2. تجميع الأصناف
   const a = aggregate(state.items);
   let h = '';
-  const titleCategory = meal === 'dinner' ? '🍔 الوجبات والأصناف' : '🥪 السندوتشات والوجبات';
-  const unitLabel = meal === 'dinner' ? ' صنف / وجبة' : ' سندوتش';
 
-  if (a.sand.length){
-    h += '<div class="card"><h2>' + titleCategory + '</h2><ul class="agg">' +
-      a.sand.map(s => '<li><span>' + esc(s.name) + '</span><b>' + s.qty + ' ' + unitLabel + '</b></li>').join('') +
-      '</ul><div class="total">الإجمالي: ' + a.sand.reduce((x,s) => x + s.qty, 0) + ' ' + unitLabel + '</div></div>';
-  }
-  
-  if (a.money.length || a.boxes.length || a.bags.length){
-    h += '<div class="card"><h2>🥡 العلب والأكياس</h2><ul class="agg">';
-    if (a.money.length) h += a.money.map(b => '<li><span>' + esc(b.name) + '</span><b>إجمالي ' + fmt(b.amt) + ' جنيه</b></li>').join('');
-    if (a.boxes.length) h += a.boxes.map(b => '<li><span>' + esc(b.name) + '</span><b>' + b.qty + ' علبة</b></li>').join('');
-    if (a.bags.length) h += a.bags.map(b => '<li><span>' + esc(b.name) + '</span><b>' + b.qty + ' كيس</b></li>').join('');
-    h += '</ul></div>';
-  }
+  // 1. كارت المطعم
+  const restTitle = meal === 'dinner' ? '🍽️ طلبات المطعم الرئيسي (الوجبات)' : '🍽️ طلبات مطعم الفول والطعام';
+  h += '<div class="card"><h2>' + restTitle + '</h2><ul class="agg">';
+  if (a.restSand.length) h += a.restSand.map(s => '<li><span>' + esc(s.name) + '</span><b>' + s.qty + '</b></li>').join('');
+  if (a.restMoney.length) h += a.restMoney.map(b => '<li><span>' + esc(b.name) + '</span><b>إجمالي ' + fmt(b.amt) + ' جنيه</b></li>').join('');
+  if (a.restBoxes.length) h += a.restBoxes.map(b => '<li><span>' + esc(b.name) + '</span><b>' + b.qty + ' علبة</b></li>').join('');
+  if (a.restBags.length) h += a.restBags.map(b => '<li><span>' + esc(b.name) + '</span><b>' + b.qty + ' كيس</b></li>').join('');
+  if (!a.restSand.length && !a.restMoney.length && !a.restBoxes.length && !a.restBags.length) h += '<li class="muted">لا توجد طلبات مطعم</li>';
+  h += '</ul></div>';
 
-  if (a.other.length){
-    h += '<div class="card"><h2>🥧 طلبات أخرى ومتفرقات</h2><ul class="agg">' +
-      a.other.map(o => '<li><span>' + esc(o.name) + '</span><b>' + o.qty + ' صنف</b></li>').join('') +
-      '</ul><div class="total">الإجمالي: ' + a.other.reduce((x,o) => x + o.qty, 0) + ' صنف</div></div>';
+  // 2. كارت السوبر ماركت
+  if (a.supermarket.length){
+    h += '<div class="card" style="border-color:var(--secondary-neon)"><h2>🏪 مشوار السوبر ماركت والبقالة</h2><ul class="agg">' +
+      a.supermarket.map(s => '<li><span>' + esc(s.name) + '</span><b>' + s.qty + ' عدد</b></li>').join('') +
+      '</ul><div class="total" style="color:var(--secondary-neon)">إجمالي أصناف البقالة: ' + a.supermarket.reduce((x,s) => x + s.qty, 0) + '</div></div>';
   }
 
-  h += '<div class="row" style="margin-bottom:14px"><button class="btn" id="copySum" type="button">📋 نسخ ملخص المطعم</button>' +
-       '<button class="btn ok" id="waSum" type="button">💬 إرسال للمطعم عبر واتساب</button></div>';
+  // 3. كارت المخبز والفطاطري
+  if (a.bakery.length){
+    h += '<div class="card" style="border-color:var(--warning-color)"><h2>🥐 مشوار المخبز والفطاطري</h2><ul class="agg">' +
+      a.bakery.map(b => '<li><span>' + esc(b.name) + '</span><b>' + b.qty + ' عدد</b></li>').join('') +
+      '</ul><div class="total">إجمالي المخبوزات: ' + a.bakery.reduce((x,b) => x + b.qty, 0) + '</div></div>';
+  }
+
+  h += '<div class="row" style="margin-bottom:14px"><button class="btn" id="copySum" type="button">📋 نسخ لستة المشاوير</button>' +
+       '<button class="btn ok" id="waSum" type="button">💬 إرسال عبر واتساب</button></div>';
   p.innerHTML = h;
-  $('copySum').onclick = async () => toast(await copyText(buildSummary()) ? '📋 تم نسخ الملخص' : '❌ تعذر النسخ', 'info');
+  $('copySum').onclick = async () => toast(await copyText(buildSummary()) ? '📋 تم نسخ الملخص المفروز' : '❌ تعذر النسخ', 'info');
   $('waSum').onclick = () => window.open('https://wa.me/?text=' + encodeURIComponent(buildSummary()), '_blank', 'noopener');
 }
 
 $('btnCalculateSummary').addEventListener('click', () => {
   calculateAndDisplaySummary();
-  toast('📊 تم تجميع وحساب جميع الطلبات بنجاح!', 'info');
+  toast('📊 تم فرز الطلبات على المحلات بنجاح!', 'info');
 });
 
 /* ---------- وقت التوزيع ---------- */
@@ -621,11 +639,6 @@ function renderDeliver(){
   let h = '<div class="counter">متبقي ' + left.length + ' عمال لم يستلموا</div>';
   left.forEach(it => {
     const pc = payChoice[it.id] || 'cash';
-    let detailsHtml = '';
-    if (it.sandText) detailsHtml += (meal === 'dinner' ? '🍔 ' : '🥪 ') + esc(it.sandText) + '<br>';
-    if (it.bulkText) detailsHtml += '🥡 ' + esc(it.bulkText) + '<br>';
-    if (it.otherText) detailsHtml += '🥧 ' + esc(it.otherText);
-
     h += '<div class="card wcard" data-id="' + esc(it.id) + '">' +
       '<div class="name">' +
         '<span>👤 ' + esc(it.name) + '</span>' +
@@ -634,7 +647,7 @@ function renderDeliver(){
           '<button class="btn-icon del" title="حذف هذا الطلب" onclick="deleteWorker(\'' + esc(it.id) + '\')">🗑️</button>' +
         '</div>' +
       '</div>' +
-      '<div class="items">' + detailsHtml + '</div>' +
+      '<div class="items">📦 ' + esc(it.details) + '</div>' +
       '<div class="pays"><button type="button" class="pill ' + (pc === 'cash' ? 'on' : '') + '" data-pay="cash">💵 كاش</button>' +
       '<button type="button" class="pill ' + (pc === 'instapay' ? 'on' : '') + '" data-pay="instapay">📱 إنستاباي</button></div>' +
       '<button type="button" class="btn ok" style="width:100%" data-deliver>استلم وحاسب ✔</button></div>';
@@ -662,7 +675,7 @@ function renderDeliver(){
   });
 }
 
-/* ---------- تبويب كل الأوردرات والتعديل ---------- */
+/* ---------- تبويب كل الأوردرات ---------- */
 function renderAllOrders(){
   const p = $('paneAll');
   if (!state.items.length){
@@ -671,11 +684,6 @@ function renderAllOrders(){
   }
   let h = '';
   state.items.forEach(it => {
-    let detailsHtml = '';
-    if (it.sandText) detailsHtml += (meal === 'dinner' ? '🍔 ' : '🥪 ') + esc(it.sandText) + '<br>';
-    if (it.bulkText) detailsHtml += '🥡 ' + esc(it.bulkText) + '<br>';
-    if (it.otherText) detailsHtml += '🥧 ' + esc(it.otherText);
-
     const statusBadge = it.delivered 
       ? '<span class="badge done">✔ استلم (' + (it.payment === 'instapay' ? '📱 إنستاباي' : '💵 كاش') + ')</span>'
       : '<span class="badge wait">⏳ لم يستلم بعد</span>';
@@ -688,36 +696,29 @@ function renderAllOrders(){
           '<button class="btn-icon del" title="حذف هذا الطلب" onclick="deleteWorker(\'' + esc(it.id) + '\')">🗑️</button>' +
         '</div>' +
       '</div>' +
-      '<div class="items" style="margin-top:8px;">' + detailsHtml + '</div>' +
+      '<div class="items" style="margin-top:8px;">📦 ' + esc(it.details) + '</div>' +
     '</div>';
   });
   p.innerHTML = h;
 }
 
-/* ---------- دالة تحميل الموظف للتعديل عند الضغط على ✏️ ---------- */
 function loadWorkerForEdit(id){
   const it = state.items.find(x => x.id === id);
   if (!it) return;
 
   editingId = id;
   $('fName').value = it.name;
-  $('fSand').value = it.sandText || '';
-  $('fBulk').value = it.bulkText || '';
-  $('fOther').value = it.otherText || '';
-
-  empType = it.type || 'sandwich';
-  setOrderTypeUI(empType);
+  $('fDetails').value = it.details || '';
 
   $('formTitle').textContent = '✏️ تعديل طلب (' + it.name + ')';
   $('savePersonBtn').textContent = '💾 حفظ التعديل';
   $('savePersonBtn').className = 'btn warn';
 
   $('formCard').scrollIntoView({ behavior: 'smooth' });
-  $('fName').focus();
+  $('fDetails').focus();
   toast('✏️ جاري تعديل طلب: ' + it.name, 'info');
 }
 
-// دالة حذف موظف مسجل
 async function deleteWorker(id){
   if (!confirm('هل تريد حذف هذا الطلب من القائمة؟')) return;
   if (editingId === id) resetFormToNew();
@@ -728,28 +729,10 @@ async function deleteWorker(id){
   toast('🗑️ تم حذف الطلب بنجاح', 'info');
 }
 
-/* ---------- ضبط واجهة نوع الطلب ---------- */
-function setOrderTypeUI(type){
-  $('typeSeg').querySelectorAll('button').forEach(btn => btn.classList.toggle('on', btn.dataset.type === type));
-  
-  $('boxSand').classList.toggle('hidden', type !== 'sandwich' && type !== 'mixed');
-  $('boxBulk').classList.toggle('hidden', meal === 'dinner' || (type !== 'bulk' && type !== 'mixed'));
-  $('boxOther').classList.toggle('hidden', type !== 'other');
-}
-
-$('typeSeg').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return;
-  empType = b.dataset.type;
-  setOrderTypeUI(empType);
-});
-
-// إعادة الفورم للوضع الافتراضي للشخص الجديد
 function resetFormToNew(){
   editingId = null;
   $('fName').value = '';
-  $('fSand').value = '';
-  $('fBulk').value = '';
-  $('fOther').value = '';
+  $('fDetails').value = '';
   $('formTitle').textContent = '➕ تسجيل طلب موظف';
   $('savePersonBtn').textContent = '💾 حفظ الطلب';
   $('savePersonBtn').className = 'btn ok';
@@ -759,16 +742,10 @@ function resetFormToNew(){
 /* ---------- حفظ الطلب والتفريغ الفوري للشخص التالي ---------- */
 $('savePersonBtn').addEventListener('click', async () => {
   const name = $('fName').value.trim();
-  const sandText = $('fSand').value.trim();
-  const bulkText = $('fBulk').value.trim();
-  const otherText = $('fOther').value.trim();
+  const details = $('fDetails').value.trim();
 
   if (!name) return toast('⚠️ اكتب اسم الموظف الأول', 'error');
-
-  if (empType === 'other' && !otherText) return toast('⚠️ اكتب تفاصيل الطلبات الأخرى', 'error');
-  if (empType === 'sandwich' && !sandText) return toast('⚠️ اكتب السندوتشات أو الوجبات المطلوبة', 'error');
-  if (empType === 'bulk' && !bulkText) return toast('⚠️ اكتب العلب المطلوبة', 'error');
-  if (empType === 'mixed' && !sandText && !bulkText) return toast('⚠️ اكتب تفاصيل السندوتشات أو العلب', 'error');
+  if (!details) return toast('⚠️ اكتب تفاصيل الطلب', 'error');
 
   const btn = $('savePersonBtn'); 
   btn.disabled = true;
@@ -778,14 +755,7 @@ $('savePersonBtn').addEventListener('click', async () => {
       await mutate(cur => {
         cur.items = cur.items.map(x => {
           if (x.id === editingId){
-            return {
-              ...x,
-              name,
-              type: empType,
-              sandText: (empType === 'sandwich' || empType === 'mixed') ? sandText : '',
-              bulkText: (meal === 'breakfast' && (empType === 'bulk' || empType === 'mixed')) ? bulkText : '',
-              otherText: empType === 'other' ? otherText : ''
-            };
+            return { ...x, name, details };
           }
           return x;
         });
@@ -798,10 +768,7 @@ $('savePersonBtn').addEventListener('click', async () => {
       const newItem = {
         id: newId,
         name,
-        type: empType,
-        sandText: (empType === 'sandwich' || empType === 'mixed') ? sandText : '',
-        bulkText: (meal === 'breakfast' && (empType === 'bulk' || empType === 'mixed')) ? bulkText : '',
-        otherText: empType === 'other' ? otherText : '',
+        details,
         delivered: false,
         payment: '',
         createdAt: Date.now()
@@ -832,16 +799,15 @@ document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click
 document.querySelectorAll('.meals button').forEach(b => b.addEventListener('click', () => {
   if (meal === b.dataset.meal) return;
   meal = b.dataset.meal; 
-  empType = 'sandwich';
   resetFormToNew();
   isSummaryCalculated = false;
   $('dupAlertContainer').innerHTML = '';
-  $('summaryResultsContainer').innerHTML = '<div class="card empty">اضغط على الزرار بالأعلى لتجميع وحساب إجمالي الأصناف والفلوس.</div>';
+  $('summaryResultsContainer').innerHTML = '<div class="card empty">اضغط على الزرار بالأعلى لفرز طلبات المطعم، والسوبر ماركت، والمخبز تلقائياً.</div>';
   updateMealUI();
   listen();
 }));
 
-/* ---------- بدء أوردر جديد (من الزر العلوي) ---------- */
+/* ---------- بدء أوردر جديد ---------- */
 $('resetBtnTop').addEventListener('click', async () => {
   if (!confirm('متأكد إنك عايز تبدأ أوردر جديد؟\nهيتم أرشفة الأوردر الحالي وتفريغ القائمة.')) return;
   try{
@@ -859,41 +825,69 @@ $('resetBtnTop').addEventListener('click', async () => {
     resetFormToNew();
     isSummaryCalculated = false;
     $('dupAlertContainer').innerHTML = '';
-    $('summaryResultsContainer').innerHTML = '<div class="card empty">اضغط على الزرار بالأعلى لتجميع وحساب إجمالي الأصناف والفلوس.</div>';
+    $('summaryResultsContainer').innerHTML = '<div class="card empty">اضغط على الزرار بالأعلى لفرز طلبات المطعم، والسوبر ماركت، والمخبز تلقائياً.</div>';
     await mutate(c => ({items:[]}));
     toast('🗑️ تم تفريغ الأوردر وبدء جلسة جديدة');
   }catch(e){ toast('❌ مشكلة في التعيين', 'error'); }
 });
 
-/* ---------- سجل 24 ساعة ---------- */
+/* ---------- سجل 24 ساعة وحذف السجل نهائياً ---------- */
 function sheetHtml(items){
   return items.map(it => {
     const st = it.delivered
       ? '<span class="ok-t">✔ استلم (' + (it.payment === 'instapay' ? '📱 إنستاباي' : '💵 كاش') + ')</span>'
       : '<span class="wait-t">⏳ لم يستلم</span>';
-    let det = (it.sandText ? it.sandText + ' ' : '') + (it.bulkText ? it.bulkText + ' ' : '') + (it.otherText ? it.otherText : '');
-    return '<div class="sheet-row"><b>' + esc(it.name) + '</b> — ' + st + '<br><span class="muted">' + esc(det) + '</span></div>';
+    return '<div class="sheet-row"><b>' + esc(it.name) + '</b> — ' + st + '<br><span class="muted">' + esc(it.details) + '</span></div>';
   }).join('');
 }
 
 $('sheetBtn').addEventListener('click', async () => {
   const body = $('sheetBody');
-  body.innerHTML = '<div class="empty">⏳ جاري التحميل...</div>';
+  body.innerHTML = '<div class="empty">⏳ جاري تحميل السجل...</div>';
   openM('mSheet');
-  let h = '<h2 style="color:var(--primary-neon)">الأوردر الحالي</h2>' +
+  
+  let h = '<h3 style="color:var(--primary-neon); margin-bottom:8px;">الأوردر الحالي</h3>' +
     (state.items.length ? sheetHtml(state.items) : '<div class="empty">لا توجد طلبات حالية</div>');
+  
   try{
     const snap = await db.collection('work_orders_archive').where('meal','==',meal).get();
     const cutoff = Date.now() - 24*60*60*1000;
-    const rows = snap.docs.map(d => d.data()).filter(d => (d.archivedMs || 0) >= cutoff).sort((a,b) => b.archivedMs - a.archivedMs);
-    h += '<h2 style="margin-top:16px;color:var(--secondary-neon)">أوردرات آخر 24 ساعة</h2>';
+    const rows = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(d => (d.archivedMs || 0) >= cutoff).sort((a,b) => b.archivedMs - a.archivedMs);
+    h += '<h3 style="margin-top:16px;color:var(--secondary-neon); margin-bottom:8px;">أوردرات سابقة في آخر 24 ساعة</h3>';
     h += rows.length ? rows.map(r => '<div class="muted" style="margin-top:8px">' +
       new Date(r.archivedMs).toLocaleString('ar-EG') + '</div>' + sheetHtml(r.items || [])).join('')
-      : '<div class="empty">لا يوجد أوردرات سابقة في آخر 24 ساعة</div>';
+      : '<div class="empty">لا توجد أوردرات سابقة</div>';
   }catch(e){
-    h += '<div class="empty muted">عرض السجل المحلي للأوردر الحالي فقط</div>';
+    h += '<div class="empty muted">عرض السجل المحلي فقط</div>';
   }
   body.innerHTML = h;
+});
+
+// حذف السجل نهائياً من قاعدة البيانات والمتصفح
+$('deleteArchiveBtn').addEventListener('click', async () => {
+  if (!confirm('⚠️ تحذير: هل أنت متأكد من مسح جميع الأوردرات السابقة والسجل نهائياً من قاعدة البيانات؟')) return;
+  
+  try{
+    $('deleteArchiveBtn').disabled = true;
+    
+    // 1. مسح أرشيف الوجبة من Firestore
+    const snap = await db.collection('work_orders_archive').where('meal', '==', meal).get();
+    const batch = db.batch();
+    snap.docs.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
+
+    // 2. تفريغ السجل في واجهة المودال
+    $('sheetBody').innerHTML = '<div class="empty" style="color:var(--success-color)">🗑️ تم حذف السجل بالكامل بنجاح.</div>';
+    
+    toast('✅ تم حذف السجل نهائياً من قاعدة البيانات بنجاح!');
+  }catch(e){
+    console.error(e);
+    toast('❌ تعذر حذف السجل من قاعدة البيانات', 'error');
+  }finally{
+    $('deleteArchiveBtn').disabled = false;
+  }
 });
 
 /* ---------- تشغيل البرنامج وضبط الواجهة ---------- */
