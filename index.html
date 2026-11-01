@@ -43,7 +43,7 @@ input[type=text],textarea{width:100%;font:inherit;color:var(--text-color);backgr
 textarea{min-height:90px;resize:vertical}
 input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px rgba(0,242,254,.4)}
 
-/* شريط الاختصارات المودرن الفخم */
+/* شريط الاختصارات المودرن */
 .shortcuts-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;background:rgba(19,26,38,.85);border:1px solid rgba(0,242,254,.2);border-radius:12px;padding:8px 12px;margin:8px 0 8px}
 .sc-tag{display:inline-flex;align-items:center;gap:5px;font-size:.8rem;font-weight:700;color:var(--text-secondary)}
 .sc-key{background:rgba(0,242,254,.15);color:var(--primary-neon);border:1px solid var(--primary-neon);padding:2px 7px;border-radius:6px;font-weight:900;font-size:.82rem;box-shadow:0 0 8px rgba(0,242,254,.3)}
@@ -156,7 +156,7 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
       <div class="sc-default">⚡ بدون حرف = يُحسب بالجنيه تلقائياً</div>
     </div>
 
-    <!-- التوجيه التنبيهي الذهبي النيون لضمان دقة التقطيع -->
+    <!-- شريط التنبيه الذهبي النيون لضمان دقة الإدخال -->
     <div class="tip-banner">
       💡 لضمان دقة الحساب 100%: افصل بين الأصناف بـ (+) أو (-) أو (و) أو سطر جديد
     </div>
@@ -347,7 +347,7 @@ const RESTAURANT_BF_DICT = [
   'فول', 'طعمية', 'طعميه', 'فلافل', 'بطاطس', 'بتنجان', 'باذنجان', 'مسقعة', 'مسقعه', 'بابا غنوج',
   'بيض', 'بيضة', 'بيضه', 'بيضات', 'اومليت', 'شكشوكة', 'شكشوكه', 'عجة', 'عجه',
   'سلطة', 'سلطه', 'طحينة', 'طحينه', 'مية سلطة', 'ميه سلطه', 'ميه سلطة', 'مية سلطه',
-  'مخلل', 'طرشي', 'عيش', 'عيش بلدي', 'شامي', 'عيش شامي', 'بانيه', 'بطاطس بانيه'
+  'مخلل', 'طرشي', 'عيش', 'عيش بلدي'
 ];
 
 const KOSHARY_DICT = ['كشري', 'طاجن', 'دقة', 'دقه', 'تقلية', 'تقليه', 'صلصة', 'صلصه', 'عيش توست', 'محمص', 'ارز بلبن', 'رز بلبن', 'مهلبية', 'مهلبيه', 'ام علي', 'أم علي'];
@@ -365,6 +365,7 @@ function cleanItemName(s){
                .replace(/\s+/g,' ')
                .trim();
 
+  // توحيد المسميات والجمع والمفرد
   if (clean === 'بيضات' || clean === 'بيضه' || clean === 'بيضة') clean = 'بيض';
   if (clean === 'سيبسي' || clean === 'شيبس') clean = 'شيبسي';
   if (clean === 'كنز') clean = 'كانز';
@@ -375,39 +376,30 @@ function cleanItemName(s){
 
 const keyOf = s => cleanItemName(s).toLowerCase();
 
-/* ---------- نظام التقطيع الذكي الفولاذي للجمل والأصناف الملتصقة ---------- */
+/* ---------- نظام التقطيع الذكي مع معالجة الأرقام والواو الملتصقة ---------- */
 function smartSplit(t){
-  let text = toEn(t).replace(/\r\n/g, '\n');
+  let normalized = toEn(t).replace(/\r\n/g, '\n');
   
-  // 1. فصل الأرقام الملتصقة بالحروف: 5فول -> 5 فول
-  text = text.replace(/(\d+)\s*([أ-يa-zA-Z])/g, '$1 $2');
+  // 1. فصل حرف و الملتصق برقم: مثل "و10 طعمية" -> 10 طعمية
+  normalized = normalized.replace(/(?:^|\n|\s)و(\d+)/g, '\n$1');
   
-  // 2. الفواصل الصريحة: +، -، /، الفواصل
-  text = text.replace(/[\+_\/,\u060C\u061B;؛\-]+/g, '\n');
-  text = text.replace(/\s+و\s+/g, '\n');
+  // 2. فصل الأرقام الملتصقة بالحروف: مثل "10طعمية" -> 10 طعمية
+  normalized = normalized.replace(/(\d+)\s*([أ-يa-zA-Z])/g, '$1 $2');
+  
+  // 3. الفواصل الصريحة
+  normalized = normalized.replace(/[\+_\/,\u060C\u061B;؛\-]+/g, '\n');
+  normalized = normalized.replace(/\s+و\s+/g, '\n');
 
-  // 3. فصل حرف الواو في أول الكلمات (مثل وكنز، وتمن، وفول)
-  text = text.replace(/(?:^|\n|\s)و(\d+)/g, '\n$1');
-  text = text.replace(/(?:^|\n|\s)و(كنز|كانز|شيبسي|سيبسي|فول|طعمية|طعميه|بيض|بطاطس|مسقعة|مسقعه|بتنجان|باذنجان|سجاير|عسل|معسل|فحم|فطير|جبنة|جبنه|لانشون|نسكافيه|شاي|سكر|كيلو|تمن|ثمن|ربع|نص|لتر)/g, '\n$1');
+  // 4. فصل حرف الواو الملتصق بالكلمات الشائعة: مثل "وكنز" -> كنز، و"وشيبسي" -> شيبسي
+  normalized = normalized.replace(/(?:^|\n|\s)و(كنز|كانز|شيبسي|سيبسي|فول|طعمية|طعميه|بيض|بطاطس|مسقعة|مسقعه|بتنجان|باذنجان|سجاير|عسل|معسل|فحم|فطير|جبنة|جبنه|لانشون|نسكافيه)/g, '\n$1');
 
-  // 4. تقطيع الأصناف عند حروف الاختصار حتى لو بدون أرقام (مثل: فول س طعمية س مسقعة ع سجاير)
-  text = text.replace(/([أ-يa-zA-Z0-9]+)\s+([سعرد])\s+(?=[أ-يa-zA-Z0-9])/g, '$1 $2\n');
-  text = text.replace(/([أ-يa-zA-Z0-9]+)\s+(?=[سعرد]\s+[أ-يa-zA-Z0-9])/g, '$1\n');
+  // 5. فصل الكلمات التي يليها رقم مباشرة: "فول 2 طعمية"
+  normalized = normalized.replace(/([^\d\n])\s+(\d+)/g, '$1\n$2');
 
-  // 5. تقطيع عند الأوزان والعبوات (كيلو، تمن، لتر، كيس، علبة، فطيرة)
-  text = text.replace(/([أ-يa-zA-Z0-9]+)\s+(?=(?:كيلو|تمن|ثمن|ربع|نص|لتر|كيس|علبة|علبه|باكتة|باكته|فطيرة|فطيره)\b)/g, '$1\n');
-
-  // 6. تقطيع ذكي عند بداية أصناف المحلات الشهيرة إن التصقت بغيرها بدون فواصل
-  text = text.replace(/([أ-يa-zA-Z0-9]+)\s+(?=(?:كيس\s+شيبسي|شيبسي|كانز|كنز|بيبسي|كولا|سجاير|معسل|فحم|فطير|عسل|سكر|شاي|جبنة|جبنه|لانشون)\b)/g, '$1\n');
-  text = text.replace(/([أ-يa-zA-Z0-9]+)\s+(?=(?:فول|طعمية|طعميه|بطاطس|مسقعة|مسقعه|بتنجان|مية\s+سلطة|ميه\s+سلطه|بيض|عيش)\b)/g, '$1\n');
-
-  // 7. فصل الكلمات التي يليها رقم مباشرة: "فول 2 طعمية"
-  text = text.replace(/([^\d\n])\s+(\d+)/g, '$1\n$2');
-
-  return text.split('\n').map(s => s.trim()).filter(Boolean);
+  return normalized.split('\n').map(s => s.trim()).filter(Boolean);
 }
 
-// دالة فحص وتصنيف كل صنف بدقة متناهية
+// دالة فحص وتصنيف كل صنف بدقة صارمة
 function parseRawItem(seg, isBreakfast){
   seg = toEn(seg).trim();
   if (!seg) return null;
@@ -487,7 +479,7 @@ function parseRawItem(seg, isBreakfast){
     return { shop: 'bf_restaurant', kind: 'money', amt: qty, name: 'مية سلطة' + priceNote };
   }
 
-  // 2. فحص السوبر ماركت أولاً لمنع ذهاب معسل الشيشة للمخبز
+  // 2. فحص السوبر ماركت والكشك (بما في ذلك المعسل والفحم)
   const isSupermarket = SUPERMARKET_DICT.some(w => clean.includes(w));
   if (isSupermarket){
     if (clean.includes('جبنه') || clean.includes('جبنة') || clean.includes('لانشون') || clean.includes('رومي')){
@@ -509,32 +501,26 @@ function parseRawItem(seg, isBreakfast){
 
   // 4. مطعم الفول والطعام الشعبي (الفطار)
   if (isBreakfast){
-    const isBfRestaurant = RESTAURANT_BF_DICT.some(w => clean.includes(w));
-    if (isBfRestaurant){
-      // العيش البلدي يظهر بالرغيف لو كُتب ر، أو بالجنيه لو سادة
-      if (clean === 'عيش' || clean === 'عيش بلدي' || clean === 'شامي' || clean === 'عيش شامي'){
-        if (unit === 'loaf' || unit === 'count'){
-          return { shop: 'bf_restaurant', kind: 'bread', qty, name: (clean.includes('شامي') ? 'عيش شامي' : 'عيش بلدي') + priceNote };
-        }
-        return { shop: 'bf_restaurant', kind: 'money', amt: qty, name: (clean.includes('شامي') ? 'عيش شامي' : 'عيش بلدي') + priceNote };
-      }
-
-      // أولوية صريحة للحروف أولاً
+    if (RESTAURANT_BF_DICT.some(w => clean.includes(w))){
+      
+      // أولوية مطلقة للحرف الصريح أولاً:
       if (unit === 'sand') return { shop: 'bf_restaurant', kind: 'sand', qty, name: clean + priceNote };
       if (unit === 'box') return { shop: 'bf_restaurant', kind: 'box', qty, name: clean + priceNote };
-      if (unit === 'loaf') return { shop: 'bf_restaurant', kind: 'bread', qty, name: clean + priceNote };
+      if (unit === 'loaf') return { shop: 'bf_restaurant', kind: 'bread', qty, name: 'عيش بلدي' + priceNote };
       if (unit === 'count') {
+        if (clean === 'عيش' || clean === 'عيش بلدي') return { shop: 'bf_restaurant', kind: 'bread', qty, name: 'عيش بلدي' + priceNote };
         return { shop: 'bf_restaurant', kind: 'eggs', qty, name: clean + priceNote };
       }
       if (unit === 'money') return { shop: 'bf_restaurant', kind: 'money', amt: qty, name: clean + priceNote };
 
-      // البيض يظهر بالعدد لو لم يُكتب حرف س
+      // في حالة عدم كتابة أي حرف (القاعدة العامة):
+      // البيض بطبيعته عدد إذا لم يُكتب س:
       if (clean === 'بيض'){
         return { shop: 'bf_restaurant', kind: 'eggs', qty, name: 'بيض' + priceNote };
       }
 
-      // القاعدة العامة: بالجنيه تلقائياً!
-      return { shop: 'bf_restaurant', kind: 'money', amt: qty, name: clean + priceNote };
+      // باقي الأصناف (فول، طعمية، مسقعة، بطاطس، بتنجان، عيش، مية سلطة) تحسب بالجنيه تلقائياً!
+      return { shop: 'bf_restaurant', kind: 'money', amt: qty, name: (clean === 'عيش' ? 'عيش بلدي' : clean) + priceNote };
     }
   }
 
