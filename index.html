@@ -43,7 +43,7 @@ input[type=text],textarea{width:100%;font:inherit;color:var(--text-color);backgr
 textarea{min-height:90px;resize:vertical}
 input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px rgba(0,242,254,.4)}
 
-/* شريط الاختصارات المودرن الفخم مع زرار الرغيف الجديد */
+/* شريط الاختصارات المودرن */
 .shortcuts-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;background:rgba(19,26,38,.85);border:1px solid rgba(0,242,254,.2);border-radius:12px;padding:8px 12px;margin:8px 0 12px}
 .sc-tag{display:inline-flex;align-items:center;gap:5px;font-size:.8rem;font-weight:700;color:var(--text-secondary)}
 .sc-key{background:rgba(0,242,254,.15);color:var(--primary-neon);border:1px solid var(--primary-neon);padding:2px 7px;border-radius:6px;font-weight:900;font-size:.82rem;box-shadow:0 0 8px rgba(0,242,254,.3)}
@@ -143,7 +143,7 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
     <label for="fName">اسم الموظف</label>
     <input type="text" id="fName" placeholder="مثال: أحمد فتحي" maxlength="60">
 
-    <!-- شريط الاختصارات المودرن الفخم الجديد -->
+    <!-- شريط الاختصارات المودرن الفخم -->
     <div class="shortcuts-bar" id="shortcutsBar">
       <div class="sc-tag"><span class="sc-key">س</span> سندوتش</div>
       <div class="sc-tag"><span class="sc-key">ع</span> علبة</div>
@@ -154,7 +154,7 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
     </div>
 
     <label for="fDetails" id="lblDetails">تفاصيل الطلب بالكامل</label>
-    <textarea id="fDetails" placeholder="اكتب براحتك: 2 س فول + 10 ر عيش + 50 عيش + 2 ع جبنة ب 25 + كيس شيبسي ب 10"></textarea>
+    <textarea id="fDetails" placeholder="اكتب براحتك: 2 س فول + 1 س بيض + 3 د بيض + 10 مية سلطة + 50 عيش"></textarea>
 
     <div class="row" style="margin-top:14px">
       <button class="btn ok" id="savePersonBtn" type="button" style="width:100%; padding:13px;">💾 حفظ الطلب</button>
@@ -356,6 +356,7 @@ function cleanItemName(s){
                .replace(/\s+/g,' ')
                .trim();
 
+  // توحيد المسميات والجمع والمفرد
   if (clean === 'بيضات' || clean === 'بيضه' || clean === 'بيضة') clean = 'بيض';
   if (clean === 'سيبسي' || clean === 'شيبس') clean = 'شيبسي';
   if (clean === 'كنز') clean = 'كانز';
@@ -371,17 +372,19 @@ function smartSplit(t){
   normalized = normalized.replace(/(\d+)\s*([أ-يa-zA-Z])/g, '$1 $2');
   normalized = normalized.replace(/[\+_\/,\u060C\u061B;؛\-]+/g, '\n');
   normalized = normalized.replace(/\s+و\s+/g, '\n');
+  // فصل الواو الملتصقة بالكلمات الشائعة
   normalized = normalized.replace(/(?:^|\n|\s)و(\d+)/g, '\n$1');
   normalized = normalized.replace(/(?:^|\n|\s)و(كنز|كانز|شيبسي|سيبسي|فول|طعمية|طعميه|بيض|بطاطس|مسقعة|مسقعه|بتنجان|باذنجان|سجاير|عسل|فطير|جبنة|جبنه|لانشون|نسكافيه)/g, '\n$1');
   normalized = normalized.replace(/([^\d\n])\s+(\d+)/g, '$1\n$2');
   return normalized.split('\n').map(s => s.trim()).filter(Boolean);
 }
 
-// دالة فحص وتصنيف كل صنف بدقة متناهية مع دعم حرف ر (رغيف) و د (عدد)
+// دالة فحص وتصنيف كل صنف بدقة صارمة
 function parseRawItem(seg, isBreakfast){
   seg = toEn(seg).trim();
   if (!seg) return null;
 
+  // استبعاد الأرقام التائهة بمفردها
   if (/^\d+$/.test(seg.replace(/\s+/g, ''))) return null;
 
   let priceNote = '';
@@ -397,9 +400,9 @@ function parseRawItem(seg, isBreakfast){
   seg = seg.replace(/^و\s*/, '').trim();
 
   let qty = 1;
-  let unit = ''; // 'sand' (س), 'box' (ع), 'count' (د / x), 'loaf' (ر / رغيف), 'money' (ج / بـ)
+  let unit = ''; // 'sand' (س), 'box' (ع), 'count' (د / x), 'loaf' (ر), 'money' (ج / بـ)
 
-  // استخراج الرقم من البداية إن وجد
+  // استخراج الرقم من البداية
   let mNum = seg.match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
   let rest = seg;
   if (mNum){
@@ -407,14 +410,14 @@ function parseRawItem(seg, isBreakfast){
     rest = mNum[2].trim();
   }
 
-  // تنظيف حالات الدمج مثل: 2 د ع جبنة -> د ثم ع
+  // تنظيف دمج د مع ع مثل: 2 د ع جبنة
   let hasCountPrefix = rest.match(/^(?:د|عدد|x)\s+/i);
   if (hasCountPrefix){
     unit = 'count';
     rest = rest.replace(/^(?:د|عدد|x)\s+/i, '').trim();
   }
 
-  // فحص وحدات الاختصار: س، ع، ر، ج، د
+  // فحص وحدات الاختصار في البداية
   let mLoaf = rest.match(/^(?:ر|رغيف|ارغفة|أرغفة)\s+(.*)$/i) || rest.match(/^(?:ر|رغيف|ارغفة|أرغفة)$/i);
   if (mLoaf){ unit = 'loaf'; rest = (mLoaf[1] || '').trim(); }
 
@@ -430,7 +433,7 @@ function parseRawItem(seg, isBreakfast){
   let mMoney = rest.match(/^(?:ج|جنيه|جنية|ب\u0640*)\s+(.*)$/i) || rest.match(/^(?:ج|جنيه|جنية)$/i);
   if (!unit && mMoney){ unit = 'money'; rest = (mMoney[1] || '').trim(); }
 
-  // فحص وحدات الاختصار في النهاية (مثل: عيش ر أو مسقعة ع)
+  // فحص وحدات الاختصار في النهاية
   if (!unit){
     let mEndLoaf = rest.match(/^(.*?)\s+(?:ر|رغيف)$/i);
     if (mEndLoaf){ unit = 'loaf'; rest = mEndLoaf[1].trim(); }
@@ -444,25 +447,19 @@ function parseRawItem(seg, isBreakfast){
     if (!unit && mEndMoney){ unit = 'money'; rest = mEndMoney[1].trim(); }
   }
 
-  // تنظيف الحروف الملتصقة مثل (ع سجاير LM أو ع عسل أو ر عيش)
+  // تنظيف الحروف الملتصقة مثل (ع سجاير أو ع عسل) لضمان نظافة الاسم
   rest = rest.replace(/^[عسكجدر]\s+/i, '').trim();
 
   let clean = cleanItemName(rest || seg);
   if (!clean || /^\d+$/.test(clean)) return null;
 
-  // 1. مية السلطة
-  if (clean.includes('ميه سلطه') || clean.includes('مية سلطة') || clean.includes('ميه سلطة') || clean.includes('مية سلطه')){
-    return { shop: 'bf_restaurant', kind: 'salad_water', qty, name: 'مية سلطة' + priceNote };
-  }
-
-  // 2. المخبز والفطاطري
+  // 1. المخبز والفطاطري
   if (BAKERY_DICT.some(w => clean.includes(w))){
     return { shop: 'bakery', kind: unit === 'box' ? 'box' : 'count', qty, name: clean + priceNote };
   }
 
-  // 3. السوبر ماركت
+  // 2. السوبر ماركت
   if (SUPERMARKET_DICT.some(w => clean.includes(w))){
-    // الجبنة الرومي واللانشون إن لم يحدد معها علبة أو عدد صريح تحسب بالجنيه
     if (clean.includes('جبنه') || clean.includes('جبنة') || clean.includes('لانشون') || clean.includes('رومي')){
       if (unit !== 'count' && unit !== 'sand' && unit !== 'box'){
         return { shop: 'supermarket', kind: 'money', amt: qty, name: clean + priceNote };
@@ -471,42 +468,39 @@ function parseRawItem(seg, isBreakfast){
     return { shop: 'supermarket', kind: unit === 'box' ? 'box' : 'count', qty, name: clean + priceNote };
   }
 
-  // 4. مطعم الفول والطعام الشعبي (الفطار)
+  // 3. مطعم الفول والطعام الشعبي (الفطار)
   if (isBreakfast){
     if (RESTAURANT_BF_DICT.some(w => clean.includes(w))){
-      // العيش: إذا كتب معه ر أو رغيف يُحسب بالرغيف
-      if (clean === 'عيش' || clean === 'عيش بلدي'){
-        if (unit === 'loaf' || unit === 'count'){
-          return { shop: 'bf_restaurant', kind: 'bread', qty, name: 'عيش بلدي' + priceNote };
-        }
-        // لو بدون حرف ر أو عيش سادة (مثل 50 عيش) يُحسب بالجنيه تلقائياً!
-        return { shop: 'bf_restaurant', kind: 'money', amt: qty, name: 'عيش بلدي' + priceNote };
+      
+      // أولوية مطلقة للحرف الصريح أولاً:
+      if (unit === 'sand') return { shop: 'bf_restaurant', kind: 'sand', qty, name: clean + priceNote };
+      if (unit === 'box') return { shop: 'bf_restaurant', kind: 'box', qty, name: clean + priceNote };
+      if (unit === 'loaf') return { shop: 'bf_restaurant', kind: 'bread', qty, name: 'عيش بلدي' + priceNote };
+      if (unit === 'count') {
+        if (clean === 'عيش' || clean === 'عيش بلدي') return { shop: 'bf_restaurant', kind: 'bread', qty, name: 'عيش بلدي' + priceNote };
+        return { shop: 'bf_restaurant', kind: 'eggs', qty, name: clean + priceNote };
       }
+      if (unit === 'money') return { shop: 'bf_restaurant', kind: 'money', amt: qty, name: clean + priceNote };
 
-      // البيض يظهر بالعدد
+      // في حالة عدم كتابة أي حرف (القاعدة العامة):
+      // البيض بطبيعته عدد إذا لم يُكتب س:
       if (clean === 'بيض'){
         return { shop: 'bf_restaurant', kind: 'eggs', qty, name: 'بيض' + priceNote };
       }
 
-      // تحديد النوع حسب الحرف
-      if (unit === 'sand') return { shop: 'bf_restaurant', kind: 'sand', qty, name: clean + priceNote };
-      if (unit === 'box') return { shop: 'bf_restaurant', kind: 'box', qty, name: clean + priceNote };
-      if (unit === 'count') return { shop: 'bf_restaurant', kind: 'sand', qty, name: clean + priceNote };
-      if (unit === 'money') return { shop: 'bf_restaurant', kind: 'money', amt: qty, name: clean + priceNote };
-
-      // القاعدة الذهبية: إذا لم يُكتب أي حرف يُحسب بالجنيه تلقائياً
-      return { shop: 'bf_restaurant', kind: 'money', amt: qty, name: clean + priceNote };
+      // باقي الأصناف (فول، طعمية، مسقعة، بطاطس، بتنجان، عيش، مية سلطة) تحسب بالجنيه تلقائياً!
+      return { shop: 'bf_restaurant', kind: 'money', amt: qty, name: (clean === 'عيش' ? 'عيش بلدي' : clean) + priceNote };
     }
   }
 
-  // 5. محلات العشاء المتخصصة
+  // 4. محلات العشاء المتخصصة
   if (!isBreakfast){
     if (KOSHARY_DICT.some(w => clean.includes(w))) return { shop: 'dinner_koshary', kind: 'count', qty, name: clean + priceNote };
     if (SYRIAN_DICT.some(w => clean.includes(w))) return { shop: 'dinner_syrian', kind: 'count', qty, name: clean + priceNote };
     if (GRILL_DICT.some(w => clean.includes(w))) return { shop: 'dinner_grill', kind: 'count', qty, name: clean + priceNote };
   }
 
-  // 6. أصناف متفرقة
+  // 5. أصناف متفرقة غير محددة
   return { shop: 'unknown', kind: 'count', qty, name: clean + priceNote };
 }
 
@@ -518,7 +512,6 @@ function aggregate(items){
   const bfMoney = new Map();
   const bfBread = new Map();
   const bfEggs = new Map();
-  const bfSaladWater = new Map();
 
   const dinKoshary = new Map();
   const dinSyrian = new Map();
@@ -559,10 +552,6 @@ function aggregate(items){
           const e = bfEggs.get(k) || {name: p.name, qty: 0};
           e.qty += p.qty;
           bfEggs.set(k, e);
-        } else if (p.kind === 'salad_water'){
-          const e = bfSaladWater.get(k) || {name: p.name, qty: 0};
-          e.qty += p.qty;
-          bfSaladWater.set(k, e);
         } else if (p.kind === 'money'){
           const e = bfMoney.get(k) || {name: p.name, amt: 0};
           e.amt += p.amt;
@@ -602,7 +591,6 @@ function aggregate(items){
     bfMoney: [...bfMoney.values()].sort((a,b) => b.amt - a.amt),
     bfBread: [...bfBread.values()].sort((a,b) => b.qty - a.qty),
     bfEggs: [...bfEggs.values()].sort((a,b) => b.qty - a.qty),
-    bfSaladWater: [...bfSaladWater.values()].sort((a,b) => b.qty - a.qty),
     dinKoshary: [...dinKoshary.values()].sort((a,b) => b.qty - a.qty),
     dinSyrian: [...dinSyrian.values()].sort((a,b) => b.qty - a.qty),
     dinGrill: [...dinGrill.values()].sort((a,b) => b.qty - a.qty),
@@ -627,7 +615,6 @@ function buildSummary(){
     if (a.bfBoxes.length) t += a.bfBoxes.map(b => '• ' + b.qty + ' علبة ' + b.name).join('\n') + '\n';
     if (a.bfBread.length) t += a.bfBread.map(b => '• ' + b.qty + ' رغيف ' + b.name).join('\n') + '\n';
     if (a.bfEggs.length) t += a.bfEggs.map(e => '• ' + e.qty + ' عدد ' + e.name).join('\n') + '\n';
-    if (a.bfSaladWater.length) t += a.bfSaladWater.map(w => '• ' + w.qty + ' عدد ' + w.name).join('\n') + '\n';
     if (a.bfMoney.length) t += a.bfMoney.map(m => '• ' + m.name + ': بـ ' + fmt(m.amt) + ' جنيه').join('\n') + '\n';
   } else {
     if (a.dinKoshary.length){
@@ -679,7 +666,7 @@ function updateMealUI(){
   $('shortcutsBar').classList.toggle('hidden', !isBreakfast);
   
   if (isBreakfast){
-    $('fDetails').placeholder = 'مثال: 2 س فول + 10 ر عيش + 50 عيش + 2 ع جبنة ب 25 + كيس شيبسي ب 10';
+    $('fDetails').placeholder = 'مثال: 2 س فول + 1 س بيض + 3 د بيض + 10 مية سلطة + 50 عيش';
   } else {
     $('fDetails').placeholder = 'مثال: 1 كشري لارج + 1 كريب كرانشي + 1 وجبة صدر + 2 كانز بيبسي';
   }
@@ -702,7 +689,7 @@ function render(){
   if (tab === 'all') renderAllOrders();
 }
 
-/* ---------- حساب وعرض الملخص المنظف تماماً ---------- */
+/* ---------- حساب وعرض الملخص النهائي المنقح ---------- */
 function calculateAndDisplaySummary(){
   isSummaryCalculated = true;
   const p = $('summaryResultsContainer');
@@ -715,7 +702,6 @@ function calculateAndDisplaySummary(){
     return;
   }
 
-  // فحص التكرار
   const dups = checkDuplicates(state.items);
   if (dups.length > 0){
     dupContainer.innerHTML = '<div class="alert-dup">' +
@@ -735,9 +721,8 @@ function calculateAndDisplaySummary(){
     if (a.bfBoxes.length) h += a.bfBoxes.map(b => '<li><span>' + esc(b.name) + '</span><b>' + b.qty + ' علبة</b></li>').join('');
     if (a.bfBread.length) h += a.bfBread.map(b => '<li><span>' + esc(b.name) + '</span><b>' + b.qty + ' رغيف</b></li>').join('');
     if (a.bfEggs.length) h += a.bfEggs.map(e => '<li><span>' + esc(e.name) + '</span><b>' + e.qty + ' عدد</b></li>').join('');
-    if (a.bfSaladWater.length) h += a.bfSaladWater.map(w => '<li><span>' + esc(w.name) + '</span><b>' + w.qty + ' عدد</b></li>').join('');
     if (a.bfMoney.length) h += a.bfMoney.map(m => '<li><span>' + esc(m.name) + '</span><b>بـ ' + fmt(m.amt) + ' جنيه</b></li>').join('');
-    if (!a.bfSand.length && !a.bfBoxes.length && !a.bfMoney.length && !a.bfBread.length && !a.bfEggs.length && !a.bfSaladWater.length) h += '<li class="muted">لا توجد طلبات مطعم</li>';
+    if (!a.bfSand.length && !a.bfBoxes.length && !a.bfMoney.length && !a.bfBread.length && !a.bfEggs.length) h += '<li class="muted">لا توجد طلبات مطعم</li>';
     h += '</ul></div>';
   } else {
     if (a.dinKoshary.length){
