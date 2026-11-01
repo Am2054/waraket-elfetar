@@ -44,10 +44,13 @@ textarea{min-height:90px;resize:vertical}
 input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px rgba(0,242,254,.4)}
 
 /* شريط الاختصارات المودرن الفخم */
-.shortcuts-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;background:rgba(19,26,38,.85);border:1px solid rgba(0,242,254,.2);border-radius:12px;padding:8px 12px;margin:8px 0 12px}
+.shortcuts-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;background:rgba(19,26,38,.85);border:1px solid rgba(0,242,254,.2);border-radius:12px;padding:8px 12px;margin:8px 0 8px}
 .sc-tag{display:inline-flex;align-items:center;gap:5px;font-size:.8rem;font-weight:700;color:var(--text-secondary)}
 .sc-key{background:rgba(0,242,254,.15);color:var(--primary-neon);border:1px solid var(--primary-neon);padding:2px 7px;border-radius:6px;font-weight:900;font-size:.82rem;box-shadow:0 0 8px rgba(0,242,254,.3)}
-.sc-default{color:var(--warning-color);font-size:.78rem;font-weight:600;width:100%;text-align:center;margin-top:4px}
+.sc-default{color:var(--warning-color);font-size:.78rem;font-weight:600;width:100%;text-align:center;margin-top:2px}
+
+/* شريط التنبيه الذهبي النيون لضمان دقة الإدخال */
+.tip-banner{background:rgba(255,165,2,.08);border:1px solid rgba(255,165,2,.35);border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:.82rem;font-weight:700;color:var(--warning-color);text-align:center;box-shadow:0 0 10px rgba(255,165,2,.15)}
 
 /* Buttons */
 .btn{font:inherit;font-weight:700;border:0;border-radius:12px;padding:11px 14px;cursor:pointer;color:#04121a;background:linear-gradient(135deg,var(--primary-neon),var(--secondary-neon));transition:.2s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
@@ -151,6 +154,11 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
       <div class="sc-tag"><span class="sc-key">ر</span> رغيف</div>
       <div class="sc-tag"><span class="sc-key">ج</span> جنيه</div>
       <div class="sc-default">⚡ بدون حرف = يُحسب بالجنيه تلقائياً</div>
+    </div>
+
+    <!-- التوجيه التنبيهي الذهبي النيون لضمان دقة التقطيع -->
+    <div class="tip-banner">
+      💡 لضمان دقة الحساب 100%: افصل بين الأصناف بـ (+) أو (-) أو (و) أو سطر جديد
     </div>
 
     <label for="fDetails" id="lblDetails">تفاصيل الطلب بالكامل</label>
