@@ -43,11 +43,11 @@ input[type=text],textarea{width:100%;font:inherit;color:var(--text-color);backgr
 textarea{min-height:90px;resize:vertical}
 input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px rgba(0,242,254,.4)}
 
-/* شريط الاختصارات المودرن الفخم مع رمز د للعدد */
+/* شريط الاختصارات المودرن الفخم مع زرار الرغيف الجديد */
 .shortcuts-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;background:rgba(19,26,38,.85);border:1px solid rgba(0,242,254,.2);border-radius:12px;padding:8px 12px;margin:8px 0 12px}
-.sc-tag{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:700;color:var(--text-secondary)}
-.sc-key{background:rgba(0,242,254,.15);color:var(--primary-neon);border:1px solid var(--primary-neon);padding:2px 8px;border-radius:6px;font-weight:900;font-size:.85rem;box-shadow:0 0 8px rgba(0,242,254,.3)}
-.sc-default{color:var(--warning-color);font-size:.78rem;font-weight:600}
+.sc-tag{display:inline-flex;align-items:center;gap:5px;font-size:.8rem;font-weight:700;color:var(--text-secondary)}
+.sc-key{background:rgba(0,242,254,.15);color:var(--primary-neon);border:1px solid var(--primary-neon);padding:2px 7px;border-radius:6px;font-weight:900;font-size:.82rem;box-shadow:0 0 8px rgba(0,242,254,.3)}
+.sc-default{color:var(--warning-color);font-size:.78rem;font-weight:600;width:100%;text-align:center;margin-top:4px}
 
 /* Buttons */
 .btn{font:inherit;font-weight:700;border:0;border-radius:12px;padding:11px 14px;cursor:pointer;color:#04121a;background:linear-gradient(135deg,var(--primary-neon),var(--secondary-neon));transition:.2s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
@@ -143,17 +143,18 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
     <label for="fName">اسم الموظف</label>
     <input type="text" id="fName" placeholder="مثال: أحمد فتحي" maxlength="60">
 
-    <!-- شريط الاختصارات المودرن الفخم -->
+    <!-- شريط الاختصارات المودرن الفخم الجديد -->
     <div class="shortcuts-bar" id="shortcutsBar">
       <div class="sc-tag"><span class="sc-key">س</span> سندوتش</div>
       <div class="sc-tag"><span class="sc-key">ع</span> علبة</div>
       <div class="sc-tag"><span class="sc-key">د</span> عدد</div>
+      <div class="sc-tag"><span class="sc-key">ر</span> رغيف</div>
       <div class="sc-tag"><span class="sc-key">ج</span> جنيه</div>
-      <div class="sc-default">⚡ بدون حرف = بالجنيه تلقائياً</div>
+      <div class="sc-default">⚡ بدون حرف = يُحسب بالجنيه تلقائياً</div>
     </div>
 
     <label for="fDetails" id="lblDetails">تفاصيل الطلب بالكامل</label>
-    <textarea id="fDetails" placeholder="اكتب براحتك: 2 س فول + 1 ع مسقعة + 15 بطاطس + 3 بيض + 1 شيبسي ب 10 + 1 كانز بيبسي"></textarea>
+    <textarea id="fDetails" placeholder="اكتب براحتك: 2 س فول + 10 ر عيش + 50 عيش + 2 ع جبنة ب 25 + كيس شيبسي ب 10"></textarea>
 
     <div class="row" style="margin-top:14px">
       <button class="btn ok" id="savePersonBtn" type="button" style="width:100%; padding:13px;">💾 حفظ الطلب</button>
@@ -347,7 +348,6 @@ const GRILL_DICT = ['حواوشي', 'كفتة', 'كفته', 'كباب', 'طرب'
 const AR_DIGITS = '٠١٢٣٤٥٦٧٨٩';
 const toEn = s => String(s).replace(/[٠-٩]/g, d => AR_DIGITS.indexOf(d)).replace(/٫/g,'.');
 
-// توحيد المسميات والجمع والمفرد
 function cleanItemName(s){
   let clean = s.replace(/[أإآ]/g,'ا')
                .replace(/ى/g,'ي')
@@ -356,7 +356,6 @@ function cleanItemName(s){
                .replace(/\s+/g,' ')
                .trim();
 
-  // دمج المسميات المترادفة
   if (clean === 'بيضات' || clean === 'بيضه' || clean === 'بيضة') clean = 'بيض';
   if (clean === 'سيبسي' || clean === 'شيبس') clean = 'شيبسي';
   if (clean === 'كنز') clean = 'كانز';
@@ -369,48 +368,38 @@ const keyOf = s => cleanItemName(s).toLowerCase();
 
 function smartSplit(t){
   let normalized = toEn(t).replace(/\r\n/g, '\n');
-  // فصل الأرقام الملتصقة بالحروف: 5فول -> 5 فول
   normalized = normalized.replace(/(\d+)\s*([أ-يa-zA-Z])/g, '$1 $2');
-  // استبدال الفواصل +، -، /، الفاصلة بالسطر الجديد
   normalized = normalized.replace(/[\+_\/,\u060C\u061B;؛\-]+/g, '\n');
   normalized = normalized.replace(/\s+و\s+/g, '\n');
-  // حل فخ الواو الملتصقة بالكلمات
   normalized = normalized.replace(/(?:^|\n|\s)و(\d+)/g, '\n$1');
   normalized = normalized.replace(/(?:^|\n|\s)و(كنز|كانز|شيبسي|سيبسي|فول|طعمية|طعميه|بيض|بطاطس|مسقعة|مسقعه|بتنجان|باذنجان|سجاير|عسل|فطير|جبنة|جبنه|لانشون|نسكافيه)/g, '\n$1');
-  // فصل الكلمات التي يليها رقم مباشرة: "فول 2 طعمية"
   normalized = normalized.replace(/([^\d\n])\s+(\d+)/g, '$1\n$2');
   return normalized.split('\n').map(s => s.trim()).filter(Boolean);
 }
 
-// دالة فحص وتصنيف كل صنف بدقة متناهية
+// دالة فحص وتصنيف كل صنف بدقة متناهية مع دعم حرف ر (رغيف) و د (عدد)
 function parseRawItem(seg, isBreakfast){
   seg = toEn(seg).trim();
   if (!seg) return null;
 
-  // تجاهل أي سطر يحتوي على أرقام فقط بدون اسم صنف (حل الصنف الشبح 10)
   if (/^\d+$/.test(seg.replace(/\s+/g, ''))) return null;
 
-  // فحص استخراج ملاحظة السعر (مثل: شيبسي ب 10 أو 5 شيبسي بـ 10)
   let priceNote = '';
+  // استخراج فئة السعر (مثل: ب 10 أو بـ 25)
   let mPrice = seg.match(/^(.*?)\s*(?:ب\u0640*|\s+ب\s+)(\d+(?:\.\d+)?)\s*(?:جنيه|جنية|ج)?$/i);
   if (mPrice && mPrice[1].trim()){
     seg = mPrice[1].trim();
     priceNote = ' (فئة ' + mPrice[2] + ' جنيه)';
   }
 
-  // تنظيف حرف ب المعلق في نهاية الكلمة (حل كيس شيبسي ب)
   seg = seg.replace(/\s+ب\u0640*$/i, '').trim();
-
-  // تنظيف كلمة كيس/أكياس إن وُجدت
   seg = seg.replace(/\b(?:كيس|اكياس|أكياس)\b/gi, '').replace(/\s+/g, ' ').trim();
-
-  // تنظيف الواو المنفردة في أول الكلمة
   seg = seg.replace(/^و\s*/, '').trim();
 
   let qty = 1;
-  let unit = ''; // 'sand' (س), 'box' (ع), 'count' (د / x), 'money' (ج / بـ)
+  let unit = ''; // 'sand' (س), 'box' (ع), 'count' (د / x), 'loaf' (ر / رغيف), 'money' (ج / بـ)
 
-  // استخراج الرقم من البداية
+  // استخراج الرقم من البداية إن وجد
   let mNum = seg.match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
   let rest = seg;
   if (mNum){
@@ -418,12 +407,22 @@ function parseRawItem(seg, isBreakfast){
     rest = mNum[2].trim();
   }
 
-  // فحص وحدات الاختصار في البداية
+  // تنظيف حالات الدمج مثل: 2 د ع جبنة -> د ثم ع
+  let hasCountPrefix = rest.match(/^(?:د|عدد|x)\s+/i);
+  if (hasCountPrefix){
+    unit = 'count';
+    rest = rest.replace(/^(?:د|عدد|x)\s+/i, '').trim();
+  }
+
+  // فحص وحدات الاختصار: س، ع، ر، ج، د
+  let mLoaf = rest.match(/^(?:ر|رغيف|ارغفة|أرغفة)\s+(.*)$/i) || rest.match(/^(?:ر|رغيف|ارغفة|أرغفة)$/i);
+  if (mLoaf){ unit = 'loaf'; rest = (mLoaf[1] || '').trim(); }
+
   let mSand = rest.match(/^(?:س|سندوتش|ساندوتش|سندوتشات)\s+(.*)$/i) || rest.match(/^(?:س|سندوتش|ساندوتش|سندوتشات)$/i);
-  if (mSand){ unit = 'sand'; rest = (mSand[1] || '').trim(); }
+  if (!unit && mSand){ unit = 'sand'; rest = (mSand[1] || '').trim(); }
 
   let mBox = rest.match(/^(?:ع|علبه|علبة|علب)\s+(.*)$/i) || rest.match(/^(?:ع|علبه|علبة|علب)$/i);
-  if (!unit && mBox){ unit = 'box'; rest = (mBox[1] || '').trim(); }
+  if (mBox){ unit = 'box'; rest = (mBox[1] || '').trim(); }
 
   let mCount = rest.match(/^(?:د|عدد|x)\s+(.*)$/i) || rest.match(/^(?:د|عدد|x)$/i);
   if (!unit && mCount){ unit = 'count'; rest = (mCount[1] || '').trim(); }
@@ -431,10 +430,12 @@ function parseRawItem(seg, isBreakfast){
   let mMoney = rest.match(/^(?:ج|جنيه|جنية|ب\u0640*)\s+(.*)$/i) || rest.match(/^(?:ج|جنيه|جنية)$/i);
   if (!unit && mMoney){ unit = 'money'; rest = (mMoney[1] || '').trim(); }
 
-  // فحص وحدات الاختصار في النهاية (مثل: مسقعة ع أو فول س)
+  // فحص وحدات الاختصار في النهاية (مثل: عيش ر أو مسقعة ع)
   if (!unit){
+    let mEndLoaf = rest.match(/^(.*?)\s+(?:ر|رغيف)$/i);
+    if (mEndLoaf){ unit = 'loaf'; rest = mEndLoaf[1].trim(); }
     let mEndSand = rest.match(/^(.*?)\s+(?:س|سندوتش|ساندوتش)$/i);
-    if (mEndSand){ unit = 'sand'; rest = mEndSand[1].trim(); }
+    if (!unit && mEndSand){ unit = 'sand'; rest = mEndSand[1].trim(); }
     let mEndBox = rest.match(/^(.*?)\s+(?:ع|علبه|علبة)$/i);
     if (!unit && mEndBox){ unit = 'box'; rest = mEndBox[1].trim(); }
     let mEndCount = rest.match(/^(.*?)\s+(?:د|عدد|x)$/i);
@@ -443,13 +444,13 @@ function parseRawItem(seg, isBreakfast){
     if (!unit && mEndMoney){ unit = 'money'; rest = mEndMoney[1].trim(); }
   }
 
-  // تنظيف الحروف الملتصقة مثل (ع سجاير LM أو ع عسل) لضمان عدم بقاء الحرف في الاسم
-  rest = rest.replace(/^[عسكجد]\s+/i, '').trim();
+  // تنظيف الحروف الملتصقة مثل (ع سجاير LM أو ع عسل أو ر عيش)
+  rest = rest.replace(/^[عسكجدر]\s+/i, '').trim();
 
   let clean = cleanItemName(rest || seg);
   if (!clean || /^\d+$/.test(clean)) return null;
 
-  // 1. مية السلطة تُعامل كصنف مستقل عن المياه المعدنية
+  // 1. مية السلطة
   if (clean.includes('ميه سلطه') || clean.includes('مية سلطة') || clean.includes('ميه سلطة') || clean.includes('مية سلطه')){
     return { shop: 'bf_restaurant', kind: 'salad_water', qty, name: 'مية سلطة' + priceNote };
   }
@@ -461,7 +462,7 @@ function parseRawItem(seg, isBreakfast){
 
   // 3. السوبر ماركت
   if (SUPERMARKET_DICT.some(w => clean.includes(w))){
-    // أصناف الجبنة الرومي واللانشون تُعامل تلقائياً بالجنيه إن لم يُحدد عدد
+    // الجبنة الرومي واللانشون إن لم يحدد معها علبة أو عدد صريح تحسب بالجنيه
     if (clean.includes('جبنه') || clean.includes('جبنة') || clean.includes('لانشون') || clean.includes('رومي')){
       if (unit !== 'count' && unit !== 'sand' && unit !== 'box'){
         return { shop: 'supermarket', kind: 'money', amt: qty, name: clean + priceNote };
@@ -473,10 +474,15 @@ function parseRawItem(seg, isBreakfast){
   // 4. مطعم الفول والطعام الشعبي (الفطار)
   if (isBreakfast){
     if (RESTAURANT_BF_DICT.some(w => clean.includes(w))){
-      // العيش البلدي يظهر بالرغيف
+      // العيش: إذا كتب معه ر أو رغيف يُحسب بالرغيف
       if (clean === 'عيش' || clean === 'عيش بلدي'){
-        return { shop: 'bf_restaurant', kind: 'bread', qty, name: 'عيش بلدي' + priceNote };
+        if (unit === 'loaf' || unit === 'count'){
+          return { shop: 'bf_restaurant', kind: 'bread', qty, name: 'عيش بلدي' + priceNote };
+        }
+        // لو بدون حرف ر أو عيش سادة (مثل 50 عيش) يُحسب بالجنيه تلقائياً!
+        return { shop: 'bf_restaurant', kind: 'money', amt: qty, name: 'عيش بلدي' + priceNote };
       }
+
       // البيض يظهر بالعدد
       if (clean === 'بيض'){
         return { shop: 'bf_restaurant', kind: 'eggs', qty, name: 'بيض' + priceNote };
@@ -500,7 +506,7 @@ function parseRawItem(seg, isBreakfast){
     if (GRILL_DICT.some(w => clean.includes(w))) return { shop: 'dinner_grill', kind: 'count', qty, name: clean + priceNote };
   }
 
-  // 6. أصناف متفرقة غير محددة
+  // 6. أصناف متفرقة
   return { shop: 'unknown', kind: 'count', qty, name: clean + priceNote };
 }
 
@@ -673,9 +679,9 @@ function updateMealUI(){
   $('shortcutsBar').classList.toggle('hidden', !isBreakfast);
   
   if (isBreakfast){
-    $('fDetails').placeholder = 'اكتب براحتك: 2 س فول + 1 ع مسقعة + 15 بطاطس + 3 بيض + 1 شيبسي ب 10 + 1 كانز بيبسي';
+    $('fDetails').placeholder = 'مثال: 2 س فول + 10 ر عيش + 50 عيش + 2 ع جبنة ب 25 + كيس شيبسي ب 10';
   } else {
-    $('fDetails').placeholder = 'اكتب براحتك: 1 كشري لارج + 1 كريب كرانشي + 1 وجبة صدر + 2 كانز بيبسي';
+    $('fDetails').placeholder = 'مثال: 1 كشري لارج + 1 كريب كرانشي + 1 وجبة صدر + 2 كانز بيبسي';
   }
 }
 
@@ -696,7 +702,7 @@ function render(){
   if (tab === 'all') renderAllOrders();
 }
 
-/* ---------- حساب وعرض الملخص المنظف تماماً من التشوهات ---------- */
+/* ---------- حساب وعرض الملخص المنظف تماماً ---------- */
 function calculateAndDisplaySummary(){
   isSummaryCalculated = true;
   const p = $('summaryResultsContainer');
