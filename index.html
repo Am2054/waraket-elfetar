@@ -128,7 +128,7 @@ input:focus,textarea:focus{border-color:var(--primary-neon);box-shadow:0 0 12px 
     <span id="syncBadge" class="badge open" title="حالة الاتصال السحابي">✅ متزامن</span>
   </header>
 
-  <!-- تنبيه الأوردر القديم بدون كلاس hidden المسبب للتعارض -->
+  <!-- تنبيه الأوردر القديم -->
   <div id="oldOrderBanner" class="alert-dup" style="border-color:var(--warning-color); color:#fff; display:none;">
     <span>⚠️ الأوردر المعروض مسجل من يوم سابق. هل تريد بدء أوردر جديد؟</span>
     <button class="btn warn" id="btnOldOrderReset" style="padding:4px 10px; margin-inline-start:8px; font-size:.8rem;">نعم، ابدأ جديد</button>
@@ -238,8 +238,17 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// تفعيل ميزة حفظ البيانات محلياً لمنع فقدان البيانات المعلقة عند التحديث
+// تفعيل ميزة حفظ البيانات محلياً
 db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+
+/* ---------- توليد وعزل هوية المشرف الفريدة (خاص بكل جهاز لوحده) ---------- */
+let supervisorId = localStorage.getItem('radar_supervisor_id');
+if (!supervisorId) {
+  supervisorId = (typeof crypto !== 'undefined' && crypto.randomUUID) 
+    ? crypto.randomUUID() 
+    : 'sup_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  localStorage.setItem('radar_supervisor_id', supervisorId);
+}
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -303,10 +312,8 @@ function cleanItemName(s){
                .replace(/\s+/g,' ')
                .trim();
 
-  // إزالة الـ التعريفية لتوحيد الأصناف (الفول -> فول)
   clean = clean.split(' ').map(w => w.replace(/^ال(?=.{3,})/, '')).join(' ');
 
-  // توحيد المسميات والجمع والمفرد
   if (clean === 'فطيره' || clean === 'فطاير') clean = 'فطير';
   if (clean === 'بيضات' || clean === 'بيضه' || clean === 'بيضة') clean = 'بيض';
   if (clean === 'سيبسي' || clean === 'شيبس') clean = 'شيبسي';
@@ -323,7 +330,6 @@ const keyOf = s => cleanItemName(s).toLowerCase();
   for (let i = 0; i < d.length; i++) d[i] = cleanItemName(d[i]);
 });
 
-/* دالة مطابقة القواميس الذكية التي تفصل الكلمات القصيرة عن الطويلة */
 const inDict = (cleanText, dict) => dict.some(w => {
   if (w.length <= 3) {
     return (' ' + cleanText + ' ').includes(' ' + w + ' ');
@@ -331,7 +337,6 @@ const inDict = (cleanText, dict) => dict.some(w => {
   return cleanText.includes(w);
 });
 
-/* تنسيق عداد الموظفين وفق قواعد اللغة العربية */
 function formatEmpCount(n){
   if (n === 0) return '0 موظفين';
   if (n === 1) return 'موظف واحد';
@@ -340,13 +345,14 @@ function formatEmpCount(n){
   return n + ' موظفاً';
 }
 
+/* LocalStorage معزول لكل مشرف */
 const localStore = {
   get(m){
-    try { return JSON.parse(localStorage.getItem('radar_meal_' + m)) || {items:[]}; }
+    try { return JSON.parse(localStorage.getItem('radar_meal_' + supervisorId + '_' + m)) || {items:[]}; }
     catch(e){ return {items:[]}; }
   },
   set(m, data){
-    try { localStorage.setItem('radar_meal_' + m, JSON.stringify(data)); }
+    try { localStorage.setItem('radar_meal_' + supervisorId + '_' + m, JSON.stringify(data)); }
     catch(e){}
   }
 };
@@ -378,8 +384,8 @@ async function copyText(text){
   }catch(e){ return false; }
 }
 
-/* ---------- Firebase Firestore مع فحص المزامنة الدقيق ---------- */
-const ref = (m) => db.collection('work_orders').doc(MEALS[m || meal].doc);
+/* ---------- Firebase Firestore معزول لكل مشرف تماماً ---------- */
+const ref = (m) => db.collection('work_orders').doc(`${supervisorId}_${MEALS[m || meal].doc}`);
 
 function setSync(status){
   const b = $('syncBadge');
@@ -396,7 +402,6 @@ function listen(){
 
   try {
     unsub = ref().onSnapshot({ includeMetadataChanges: true }, snap => {
-      // فحص حقيقي لحالة المزامنة السحابية
       setSync(!snap.metadata.fromCache && !snap.metadata.hasPendingWrites);
       if (snap.exists && Array.isArray(snap.data().items)){
         state = {items: snap.data().items};
@@ -421,6 +426,7 @@ function mutate(fn){
   if (isSummaryCalculated) calculateAndDisplaySummary();
 
   ref().set({
+    supervisorId: supervisorId,
     items: next.items,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   }, {merge:true})
@@ -435,16 +441,16 @@ function mutate(fn){
 function smartSplit(t){
   let normalized = toEn(t).replace(/\r\n/g, '\n');
   
-  // 1. دمج السعر مع الكلمة قبل تقطيع الأرقام لمنع كسر "ب 10" أو "بـ 25"
+  // 1. دمج السعر مع الكلمة قبل تقطيع الأرقام
   normalized = normalized.replace(/(\S)\s+ب\u0640*\s*(\d+)/g, '$1 ب$2');
 
-  // 2. فصل الشرطة المحاطة بمسافات كفاصل رسمي دون كسر الكلمات المركبة
+  // 2. فصل الشرطة المحاطة بمسافات كفاصل رسمي
   normalized = normalized.replace(/\s+[-–—]\s+/g, '\n');
 
   // 3. فصل و الملتصقة برقم: و10 -> 10
   normalized = normalized.replace(/(?:^|\n|\s)و(\d+)/g, '\n$1');
   
-  // 4. فصل الأرقام الملتصقة بالحروف بدون Lookbehind لحماية أجهزة Safari
+  // 4. فصل الأرقام الملتصقة بالحروف بدون Lookbehind لحماية Safari
   normalized = normalized.replace(/(\d+(?:\/\d+)?)\s*([أ-يa-zA-Z])/g, '$1 $2');
   
   // 5. الفواصل الصريحة
@@ -454,23 +460,20 @@ function smartSplit(t){
   // 6. فصل و الملتصقة بالكلمات الشائعة
   normalized = normalized.replace(/(?:^|\n|\s)و(كنز|كانز|شيبسي|سيبسي|فول|طعمية|طعميه|بيض|بطاطس|مسقعة|مسقعه|بتنجان|باذنجان|سجاير|عسل|معسل|فحم|فطير|جبنة|جبنه|لانشون|نسكافيه)/g, '\n$1');
   
-  // 7. فصل الكلمات التي يليها رقم مباشرة دون استثناء حرف ب
+  // 7. فصل الكلمات التي يليها رقم مباشرة
   normalized = normalized.replace(/([^\d\n])\s+(\d+)/g, '$1\n$2');
 
   return normalized.split('\n').map(s => s.trim()).filter(Boolean);
 }
 
-// دالة فحص وتصنيف كل صنف بدقة متناهية
 function parseRawItem(seg, isBreakfast){
   seg = toEn(seg).trim();
   if (!seg) return null;
 
-  // تحويل الكسور النصية والرياضية إلى أرقام عشرية
   seg = seg.replace(/^(\d+)\/(\d+)\s*/, (m,a,b) => String(+a / +b) + ' ')
            .replace(/^نص\s+/, '0.5 ')
            .replace(/^ربع\s+/, '0.25 ');
 
-  // فحص استخراج ملاحظة السعر مع دعم "بـ" مع التطويلة وبدونها
   let priceNote = '';
   let mPrice = seg.match(/^(.*?)\s+ب\u0640*(\d+(?:\.\d+)?)\s*(?:جنيه|جنية|ج)?$/i) ||
                seg.match(/^(.*?)\s*ب(\d+(?:\.\d+)?)\s*(?:جنيه|جنية|ج)?$/i);
@@ -479,15 +482,13 @@ function parseRawItem(seg, isBreakfast){
     priceNote = ' (فئة ' + mPrice[2] + ' جنيه)';
   }
 
-  // تنظيف الكلمات وحرف ب المعلق باستخدام حدود الكلمات العربية السليمة
   seg = seg.replace(/\s+ب\u0640*$/i, '').trim();
   seg = seg.replace(/(^|\s)(?:كيس|اكياس|أكياس)(?=\s|$)/g, ' ').replace(/\s+/g, ' ').trim();
   seg = seg.replace(/^و\s*/, '').trim();
 
   let qty = 1;
-  let unit = ''; // 'sand', 'box', 'count', 'loaf', 'money'
+  let unit = '';
 
-  // دعم "بـ 15 فول" بحيث تلتقط المبلغ واسم الصنف مباشرة
   let mLeadingMoney = seg.match(/^ب\u0640*(\d+(?:\.\d+)?)\s+(.*)$/i);
   let rest = seg;
   if (mLeadingMoney){
@@ -495,7 +496,6 @@ function parseRawItem(seg, isBreakfast){
     qty = +mLeadingMoney[1];
     rest = mLeadingMoney[2].trim();
   } else {
-    // استخراج الرقم من البداية
     let mNum = seg.match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
     if (mNum){
       qty = +mNum[1];
@@ -503,14 +503,12 @@ function parseRawItem(seg, isBreakfast){
     }
   }
 
-  // تنظيف دمج د مع ع مثل: 2 د ع جبنة
   let hasCountPrefix = rest.match(/^(?:د|عدد|x)\s+/i);
   if (hasCountPrefix){
     unit = 'count';
     rest = rest.replace(/^(?:د|عدد|x)\s+/i, '').trim();
   }
 
-  // فحص وحدات الاختصار في البداية
   let mLoaf = rest.match(/^(?:ر|رغيف|ارغفة|أرغفة)\s+(.*)$/i) || rest.match(/^(?:ر|رغيف|ارغفة|أرغفة)$/i);
   if (mLoaf){ unit = 'loaf'; rest = (mLoaf[1] || '').trim(); }
 
@@ -526,7 +524,6 @@ function parseRawItem(seg, isBreakfast){
   let mMoney = rest.match(/^(?:ج|جنيه|جنية|ب\u0640*)\s+(.*)$/i) || rest.match(/^(?:ج|جنيه|جنية)$/i);
   if (!unit && mMoney){ unit = 'money'; rest = (mMoney[1] || '').trim(); }
 
-  // فحص وحدات الاختصار في النهاية
   if (!unit){
     let mEndLoaf = rest.match(/^(.*?)\s+(?:ر|رغيف)$/i);
     if (mEndLoaf){ unit = 'loaf'; rest = mEndLoaf[1].trim(); }
@@ -540,23 +537,21 @@ function parseRawItem(seg, isBreakfast){
     if (!unit && mEndMoney){ unit = 'money'; rest = mEndMoney[1].trim(); }
   }
 
-  // تنظيف الحروف الملتصقة
   rest = rest.replace(/^[عسكجدر]\s+/i, '').trim();
 
   let clean = cleanItemName(rest || seg);
   
-  // لا نرمي أي شيء في صمت: الأرقام التائهة أو غير المفهومة تعرض في المتفرقات بوضوح
   if (!clean || clean.length <= 1 || /^\d+$/.test(clean) || /^[عسكجدر]$/.test(clean)){
     return { shop: 'unknown', kind: 'count', qty: 1, name: '⚠️ غير مفهوم: ' + seg };
   }
 
-  // 1. مية السلطة تُعامل بالمبلغ أو العلب
+  // 1. مية السلطة
   if (clean.includes('ميه سلطه') || clean.includes('مية سلطة') || clean.includes('ميه سلطة') || clean.includes('مية سلطه')){
     if (unit === 'box') return { shop: 'bf_restaurant', kind: 'box', qty, name: 'مية سلطة' + priceNote };
     return { shop: 'bf_restaurant', kind: 'money', amt: qty, name: 'مية سلطة' + priceNote };
   }
 
-  // 2. فحص السوبر ماركت مع معالجة حرف الجنيه والأجبان (باستخدام جبنه بالهاء)
+  // 2. السوبر ماركت والكشك
   if (inDict(clean, SUPERMARKET_DICT)){
     if (unit === 'money') return { shop: 'supermarket', kind: 'money', amt: qty, name: clean + priceNote };
     if (clean.includes('جبنه') || clean.includes('لانشون') || clean.includes('رومي')){
@@ -567,7 +562,7 @@ function parseRawItem(seg, isBreakfast){
     return { shop: 'supermarket', kind: unit === 'box' ? 'box' : 'count', qty, name: clean + priceNote };
   }
 
-  // 3. فحص المخبز والفطاطري مع حماية العسل الصريح
+  // 3. المخبز والفطاطري
   const isBakery = BAKERY_DICT.some(w => {
     if (w === 'عسل') return /(?:^|\s)(?:ال)?عسل(?:\s|$)/.test(clean);
     return inDict(clean, [w]);
@@ -576,10 +571,9 @@ function parseRawItem(seg, isBreakfast){
     return { shop: 'bakery', kind: unit === 'box' ? 'box' : 'count', qty, name: clean + priceNote };
   }
 
-  // 4. مطعم الفول والطعام الشعبي (الفطار)
+  // 4. مطعم الفول والطعام الشعبي
   if (isBreakfast){
     if (inDict(clean, RESTAURANT_BF_DICT)){
-      // العيش البلدي والشامي
       if (clean === 'عيش' || clean === 'عيش بلدي' || clean === 'شامي' || clean === 'عيش شامي'){
         if (unit === 'loaf' || unit === 'count'){
           return { shop: 'bf_restaurant', kind: 'bread', qty, name: (clean.includes('شامي') ? 'عيش شامي' : 'عيش بلدي') + priceNote };
@@ -587,19 +581,16 @@ function parseRawItem(seg, isBreakfast){
         return { shop: 'bf_restaurant', kind: 'money', amt: qty, name: (clean.includes('شامي') ? 'عيش شامي' : 'عيش بلدي') + priceNote };
       }
 
-      // أولوية صريحة للحروف أولاً
       if (unit === 'sand') return { shop: 'bf_restaurant', kind: 'sand', qty, name: clean + priceNote };
       if (unit === 'box') return { shop: 'bf_restaurant', kind: 'box', qty, name: clean + priceNote };
       if (unit === 'loaf') return { shop: 'bf_restaurant', kind: 'bread', qty, name: clean + priceNote };
       if (unit === 'count') return { shop: 'bf_restaurant', kind: 'eggs', qty, name: clean + priceNote };
       if (unit === 'money') return { shop: 'bf_restaurant', kind: 'money', amt: qty, name: clean + priceNote };
 
-      // البيض يظهر بالعدد لو لم يُكتب حرف س
       if (clean === 'بيض'){
         return { shop: 'bf_restaurant', kind: 'eggs', qty, name: 'بيض' + priceNote };
       }
 
-      // بالجنيه تلقائياً بدون إضافة علامة ⚠️ في الاسم لمنع تشتت الأسطر
       return { shop: 'bf_restaurant', kind: 'money', amt: qty, name: clean + priceNote };
     }
   }
@@ -611,7 +602,6 @@ function parseRawItem(seg, isBreakfast){
     if (inDict(clean, GRILL_DICT)) return { shop: 'dinner_grill', kind: 'count', qty, name: clean + priceNote };
   }
 
-  // 6. أصناف متفرقة غير محددة
   return { shop: 'unknown', kind: 'count', qty, name: clean + priceNote };
 }
 
@@ -874,7 +864,6 @@ function calculateAndDisplaySummary(){
     }
   }
 
-  // كارت السوبر ماركت والكشك
   if (a.supermarket.length || a.supermarketMoney.length){
     h += '<div class="card" style="border-color:var(--secondary-neon)"><h2>🏪 مشوار السوبر ماركت والكشك</h2><ul class="agg">';
     if (a.supermarket.length) h += a.supermarket.map(s => '<li><span>' + esc(s.name) + '</span><b>' + fmt(s.qty) + ' عدد</b></li>').join('');
@@ -882,13 +871,11 @@ function calculateAndDisplaySummary(){
     h += '</ul></div>';
   }
 
-  // كارت المخبز
   if (a.bakery.length){
     h += '<div class="card" style="border-color:var(--warning-color)"><h2>🥐 مشوار المخبز والفطاطري</h2><ul class="agg">' +
       a.bakery.map(b => '<li><span>' + esc(b.name) + '</span><b>' + fmt(b.qty) + ' عدد</b></li>').join('') + '</ul></div>';
   }
 
-  // كارت الأصناف المتفرقة
   if (a.unknown.length){
     h += '<div class="card" style="border-color:rgba(176,184,198,.4)"><h2>🔍 أصناف متفرقة (راجع مكان شرائها)</h2><ul class="agg">' +
       a.unknown.map(u => '<li><span>' + esc(u.name) + '</span><b>' + fmt(u.qty) + ' عدد</b></li>').join('') + '</ul></div>';
@@ -957,7 +944,7 @@ function renderDeliver(){
   });
 }
 
-/* ---------- تبويب كل الأوردرات مع إصلاح الـ CSS ---------- */
+/* ---------- تبويب كل الأوردرات ---------- */
 function renderAllOrders(){
   const p = $('paneAll');
   if (!state.items.length){
@@ -1096,7 +1083,7 @@ document.querySelectorAll('.meals button').forEach(b => b.addEventListener('clic
   listen();
 }));
 
-/* ---------- بدء أوردر جديد محمي بمهلة 8 ثواني ---------- */
+/* ---------- بدء أوردر جديد محمي بمهلة 8 ثواني ومعزول للمشرف ---------- */
 async function executeOrderReset(){
   if (!confirm('متأكد إنك عايز تبدأ أوردر جديد؟\nسيتم حفظ الأوردر الحالي في السجل أولاً ثم تفريغ القائمة.')) return;
   const m = meal, cur = state;
@@ -1104,6 +1091,7 @@ async function executeOrderReset(){
     try {
       await Promise.race([
         db.collection('work_orders_archive').add({
+          supervisorId: supervisorId,
           meal: m, 
           items: cur.items, 
           archivedAt: firebase.firestore.FieldValue.serverTimestamp(), 
@@ -1128,7 +1116,7 @@ async function executeOrderReset(){
 $('resetBtnBottom').addEventListener('click', executeOrderReset);
 $('btnOldOrderReset').addEventListener('click', executeOrderReset);
 
-/* ---------- سجل 24 ساعة وحذف السجل المحمي برقم سري خفي ---------- */
+/* ---------- سجل 24 ساعة خاص بكل مشرف ومعزول ---------- */
 function sheetHtml(items){
   return items.map(it => {
     const st = it.delivered
@@ -1147,7 +1135,11 @@ $('sheetBtn').addEventListener('click', async () => {
     (state.items.length ? sheetHtml(state.items) : '<div class="empty">لا توجد طلبات حالية</div>');
   
   try{
-    const snap = await db.collection('work_orders_archive').where('meal','==',meal).get();
+    const snap = await db.collection('work_orders_archive')
+      .where('supervisorId', '==', supervisorId)
+      .where('meal', '==', meal)
+      .get();
+      
     const cutoff = Date.now() - 24*60*60*1000;
     const rows = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(d => (d.archivedMs || 0) >= cutoff).sort((a,b) => b.archivedMs - a.archivedMs);
     h += '<h3 style="margin-top:16px;color:var(--secondary-neon); margin-bottom:8px;">أوردرات سابقة في آخر 24 ساعة</h3>';
@@ -1171,7 +1163,11 @@ $('deleteArchiveBtn').addEventListener('click', async () => {
   
   try{
     $('deleteArchiveBtn').disabled = true;
-    const snap = await db.collection('work_orders_archive').where('meal', '==', meal).get();
+    const snap = await db.collection('work_orders_archive')
+      .where('supervisorId', '==', supervisorId)
+      .where('meal', '==', meal)
+      .get();
+      
     const batch = db.batch();
     snap.docs.forEach(doc => {
       batch.delete(doc.ref);
