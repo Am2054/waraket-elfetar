@@ -241,7 +241,7 @@ const db = firebase.firestore();
 // تفعيل ميزة حفظ البيانات محلياً
 db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
 
-/* ---------- توليد وعزل هوية المشرف الفريدة (خاص بكل جهاز لوحده) ---------- */
+/* ---------- توليد وعزل هوية المشرف الفريدة ---------- */
 let supervisorId = localStorage.getItem('radar_supervisor_id');
 if (!supervisorId) {
   supervisorId = (typeof crypto !== 'undefined' && crypto.randomUUID) 
@@ -303,7 +303,6 @@ const toEn = s => String(s)
   .replace(/[۰-۹]/g, d => FA_DIGITS.indexOf(d))
   .replace(/٫/g,'.');
 
-/* تنظيف وتوحيد الأسماء وإزالة الـ التعريفية */
 function cleanItemName(s){
   let clean = s.replace(/[أإآ]/g,'ا')
                .replace(/ى/g,'ي')
@@ -325,7 +324,6 @@ function cleanItemName(s){
 
 const keyOf = s => cleanItemName(s).toLowerCase();
 
-/* تطبيع جميع القواميس عند الإقلاع */
 [SUPERMARKET_DICT, BAKERY_DICT, RESTAURANT_BF_DICT, KOSHARY_DICT, SYRIAN_DICT, GRILL_DICT].forEach(d => {
   for (let i = 0; i < d.length; i++) d[i] = cleanItemName(d[i]);
 });
@@ -345,7 +343,6 @@ function formatEmpCount(n){
   return n + ' موظفاً';
 }
 
-/* LocalStorage معزول لكل مشرف */
 const localStore = {
   get(m){
     try { return JSON.parse(localStorage.getItem('radar_meal_' + supervisorId + '_' + m)) || {items:[]}; }
@@ -597,9 +594,9 @@ function parseRawItem(seg, isBreakfast){
 
   // 5. محلات العشاء المتخصصة
   if (!isBreakfast){
-    if (inDict(clean, KOSHARY_DICT)) return { shop: 'dinner_koshary', kind: 'count', qty, name: clean + priceNote };
-    if (inDict(clean, SYRIAN_DICT)) return { shop: 'dinner_syrian', kind: 'count', qty, name: clean + priceNote };
-    if (inDict(clean, GRILL_DICT)) return { shop: 'dinner_grill', kind: 'count', qty, name: clean + priceNote };
+    if (KOSHARY_DICT.some(w => clean.includes(w))) return { shop: 'dinner_koshary', kind: 'count', qty, name: clean + priceNote };
+    if (SYRIAN_DICT.some(w => clean.includes(w))) return { shop: 'dinner_syrian', kind: 'count', qty, name: clean + priceNote };
+    if (GRILL_DICT.some(w => clean.includes(w))) return { shop: 'dinner_grill', kind: 'count', qty, name: clean + priceNote };
   }
 
   return { shop: 'unknown', kind: 'count', qty, name: clean + priceNote };
@@ -749,6 +746,22 @@ function buildSummary(){
   return t.trim();
 }
 
+/* دالة صياغة الشنط الفردية بالأسماء (الاقتراح الثاني) */
+function buildIndividualBagsText(){
+  if (!state.items.length) return '';
+  const d = new Date().toLocaleDateString('ar-EG', {weekday:'long', day:'numeric', month:'long'});
+  let t = '🛍️ أوردر ' + MEALS[meal].label + ' - شنط منفصلة بالأسماء (' + d + ')\n';
+  t += '⚠️ برجاء تجهيز كل طلب في كيس/شنطة منفصلة وكتابة الاسم عليه:\n';
+  t += '━━━━━━━━━━━━━━━━━━━━\n';
+  state.items.forEach((it, idx) => {
+    t += (idx + 1) + '. كيس باسم (' + it.name + '):\n';
+    t += '   📦 ' + it.details + '\n\n';
+  });
+  t += '━━━━━━━━━━━━━━━━━━━━\n';
+  t += '🥪 تم التجهيز عبر رادار أوردرات الشغل';
+  return t.trim();
+}
+
 function checkDuplicates(items){
   const map = new Map();
   const duplicates = [];
@@ -812,7 +825,7 @@ function render(){
   if (tab === 'all') renderAllOrders();
 }
 
-/* ---------- حساب وعرض الملخص النهائي المنقح ---------- */
+/* ---------- حساب وعرض الملخص النهائي المنقح مع خيارات الشنط الفردية ---------- */
 function calculateAndDisplaySummary(){
   isSummaryCalculated = true;
   const p = $('summaryResultsContainer');
@@ -864,28 +877,45 @@ function calculateAndDisplaySummary(){
     }
   }
 
+  // كارت السوبر ماركت والكشك
   if (a.supermarket.length || a.supermarketMoney.length){
     h += '<div class="card" style="border-color:var(--secondary-neon)"><h2>🏪 مشوار السوبر ماركت والكشك</h2><ul class="agg">';
-    if (a.supermarket.length) h += a.supermarket.map(s => '<li><span>' + esc(s.name) + '</span><b>' + fmt(s.qty) + ' عدد</b></li>').join('');
+    if (a.supermarket.length) h += a.supermarket.map(s => '<li><span>' + esc(s.name) + '</span><b>' + s.qty + ' عدد</b></li>').join('');
     if (a.supermarketMoney.length) h += a.supermarketMoney.map(m => '<li><span>' + esc(m.name) + '</span><b>بـ ' + fmt(m.amt) + ' جنيه</b></li>').join('');
     h += '</ul></div>';
   }
 
+  // كارت المخبز
   if (a.bakery.length){
     h += '<div class="card" style="border-color:var(--warning-color)"><h2>🥐 مشوار المخبز والفطاطري</h2><ul class="agg">' +
       a.bakery.map(b => '<li><span>' + esc(b.name) + '</span><b>' + fmt(b.qty) + ' عدد</b></li>').join('') + '</ul></div>';
   }
 
+  // كارت الأصناف المتفرقة
   if (a.unknown.length){
     h += '<div class="card" style="border-color:rgba(176,184,198,.4)"><h2>🔍 أصناف متفرقة (راجع مكان شرائها)</h2><ul class="agg">' +
       a.unknown.map(u => '<li><span>' + esc(u.name) + '</span><b>' + fmt(u.qty) + ' عدد</b></li>').join('') + '</ul></div>';
   }
 
-  h += '<div class="row" style="margin-bottom:14px"><button class="btn" id="copySum" type="button">📋 نسخ لستة المشاوير</button>' +
-       '<button class="btn ok" id="waSum" type="button">💬 إرسال عبر واتساب</button></div>';
+  // أزرار النسخ والمشاركة: مجمعة + شنط فردية بالأسماء (الاقتراح الثاني)
+  h += '<div class="row" style="margin-bottom:8px">' +
+       '<button class="btn" id="copySum" type="button">📋 نسخ مجمّع للمطعم</button>' +
+       '<button class="btn ok" id="waSum" type="button">💬 واتساب مجمّع</button>' +
+       '</div>' +
+       '<div class="row" style="margin-bottom:14px">' +
+       '<button class="btn ghost" id="copyBags" type="button">🛍️ نسخ كـ شنط فردية</button>' +
+       '<button class="btn ok" id="waBags" type="button" style="background:linear-gradient(135deg, #00f2fe, #4facfe)">💬 واتساب شنط فردية</button>' +
+       '</div>';
+
   p.innerHTML = h;
-  $('copySum').onclick = async () => toast(await copyText(buildSummary()) ? '📋 تم نسخ الملخص المفروز' : '❌ تعذر النسخ', 'info');
+
+  // ربط أحداث أزرار الملخص المجمّع
+  $('copySum').onclick = async () => toast(await copyText(buildSummary()) ? '📋 تم نسخ الملخص المجمّع' : '❌ تعذر النسخ', 'info');
   $('waSum').onclick = () => window.open('https://wa.me/?text=' + encodeURIComponent(buildSummary()), '_blank', 'noopener');
+
+  // ربط أحداث أزرار الشنط الفردية بالأسماء
+  $('copyBags').onclick = async () => toast(await copyText(buildIndividualBagsText()) ? '🛍️ تم نسخ لستة الشنط بالأسماء' : '❌ تعذر النسخ', 'info');
+  $('waBags').onclick = () => window.open('https://wa.me/?text=' + encodeURIComponent(buildIndividualBagsText()), '_blank', 'noopener');
 }
 
 $('btnCalculateSummary').addEventListener('click', () => {
@@ -944,7 +974,7 @@ function renderDeliver(){
   });
 }
 
-/* ---------- تبويب كل الأوردرات ---------- */
+/* ---------- تبويب كل الأوردرات مع إصلاح الـ CSS ---------- */
 function renderAllOrders(){
   const p = $('paneAll');
   if (!state.items.length){
